@@ -1,4 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Universal Performance</string>
-    <string name="app_description">GPU & CPU Performance Optimizer — Anti-Lag, 120Hz, arm64-v8a</string>
+    <!-- Replace YOUR app name above -->
+    
+    <!-- Example: if you had "Game & Tools" → change to "Game &amp; Tools" -->
+    <!-- <string name="example">Game &amp; Tools</string> -->
 </resources>
