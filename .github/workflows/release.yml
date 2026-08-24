@@ -1,5 +1,4 @@
 name: Build & Release APK
-run-name: Release — ${{ github.sha }}
 
 on:
   push:
@@ -13,11 +12,10 @@ permissions:
 
 jobs:
   build:
-    name: Build Optimized APK
+    name: Build Release APK
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
-    # 🛡️ Anti-crash: prevent concurrent builds
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
@@ -35,14 +33,6 @@ jobs:
           java-version: '17'
           cache: gradle
 
-      - name: 📂 Check project structure
-        run: |
-          ls -la
-          if [ ! -f "gradlew" ]; then
-            echo "❌ ERROR: gradlew not found!"
-            exit 1
-          fi
-
       - name: 🔑 Prepare keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -50,26 +40,19 @@ jobs:
           mkdir -p app
           echo "$KEYSTORE_BASE64" | base64 -d > app/keystore.jks
           ls -lh app/keystore.jks
+        shell: bash
 
-      - name: 🛠️ Fix permissions & cache
-        run: |
-          chmod +x gradlew
-          ./gradlew --version
-
-      - name: 🚀 Build Release APK
-        id: build
+      - name: 🛠️ Build Release APK
         env:
           KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASS: ${{ secrets.KEY_PASS }}
         run: |
-          ./gradlew clean assembleRelease \
-            --no-daemon \
-            --parallel \
-            --build-cache \
-            --stacktrace
+          chmod +x gradlew
+          ./gradlew clean assembleRelease --no-daemon --parallel --stacktrace
+        shell: bash
 
-      - name: ✅ Verify built files
+      - name: ✅ Verify APK exists
         run: |
           APK_DIR="app/build/outputs/apk/release"
           if [ ! -d "$APK_DIR" ]; then
@@ -80,6 +63,7 @@ jobs:
             echo "❌ No APK files generated!"
             exit 1
           }
+        shell: bash
 
       - name: 📦 Upload APK Artifact
         uses: actions/upload-artifact@v4
@@ -95,9 +79,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: Universal Performance ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
-          files: app/build/outputs/apk/release/*.apk
           generate_release_notes: true
+          files: app/build/outputs/apk/release/*.apk
           body: |
             ## ✅ Build Success — Universal Performance
             - **Package**: `com.universal.performance`
@@ -106,5 +89,4 @@ jobs:
             - **Android**: 5.0+ (API 21) — 16+
             - **Optimizations**: R8, ProGuard, zipalign
             - **Build SHA**: `${{ github.sha }}`
-            - **Built at**: ${{ github.event.head_commit.timestamp }}
             
