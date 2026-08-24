@@ -31,31 +31,21 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 🔧 CREATE MISSING gradle-wrapper.jar (FIX!)
+      - name: 🔧 GENERATE ALL GRADLE FILES (NO DOWNLOADS!)
         run: |
-          mkdir -p gradle/wrapper
+          # Install Gradle temporarily
+          sudo apt-get update -y
+          sudo apt-get install -y gradle
           
-          # Create properties file
-          echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
-          echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
-          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
-          echo "networkTimeout=60000" >> gradle/wrapper/gradle-wrapper.properties
-          echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
-          echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+          # ✅ This creates CORRECT gradle-wrapper.jar (~63KB) automatically!
+          gradle wrapper --gradle-version 8.5
           
-          # DOWNLOAD the CORRECT JAR — use Gradle's official mirror
-          echo "📥 Downloading gradle-wrapper.jar..."
-          curl -L -o gradle/wrapper/gradle-wrapper.jar \
-            https://services.gradle.org/distributions/gradle-wrapper-8.5.jar
-          
-          # Verify size
-          JAR_SIZE=$(stat -c%s gradle/wrapper/gradle-wrapper.jar)
-          echo "✅ JAR size: $JAR_SIZE bytes"
-          
-          # Make gradlew executable
+          # Make executable
           chmod +x ./gradlew
           
-          # Show files
+          # Verify — JAR should be ~63000 bytes!
+          JAR_SIZE=$(stat -c%s gradle/wrapper/gradle-wrapper.jar)
+          echo "✅ JAR size: $JAR_SIZE bytes"
           ls -la gradle/wrapper/
 
       - name: 🚀 Build Release APK
