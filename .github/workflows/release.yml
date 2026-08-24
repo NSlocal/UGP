@@ -32,25 +32,22 @@ jobs:
           java-version: '17'
           cache: gradle
 
-      - name: 🔧 Fix Gradle Wrapper
+      - name: 🔧 Generate Correct Gradle Wrapper
         run: |
           mkdir -p gradle/wrapper
           
-          # Download gradle-wrapper.jar directly
-          if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
-            curl -L -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.5.0/gradle-wrapper.jar
+          # Install Gradle temporarily to generate the proper wrapper files
+          if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ] || [ $(stat -c%s gradle/wrapper/gradle-wrapper.jar) -lt 100000 ]; then
+            echo "📦 Installing Gradle to generate proper wrapper..."
+            sudo apt-get update -y
+            sudo apt-get install -y gradle
+            
+            # Generate ALL proper wrapper files (including valid JAR)
+            gradle wrapper --gradle-version 8.5 --no-daemon
+            echo "✅ Gradle Wrapper generated with correct JAR file"
           fi
           
-          # Create properties file using echo (NO heredoc!)
-          if [ ! -f "gradle/wrapper/gradle-wrapper.properties" ]; then
-            echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
-            echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
-            echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
-            echo "networkTimeout=60000" >> gradle/wrapper/gradle-wrapper.properties
-            echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
-            echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
-          fi
-          
+          # Always make gradlew executable
           chmod +x ./gradlew
           ls -la ./gradlew gradle/wrapper/
 
