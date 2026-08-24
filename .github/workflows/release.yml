@@ -1,41 +1,69 @@
-name: Build Optimized Release APK
-on: push
+name: Build & Release APK
+run-name: Release — ${{ github.sha }}
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
 jobs:
   build:
+    name: Build Release APK
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with: { distribution: 'temurin', java-version: '17' }
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
 
-      - name: Grant execute permission
-        run: chmod +x gradlew
+      - name: ☕ Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Build Release APK (arm64-v8a)
+      - name: 🔑 Decode keystore
         env:
-          KEYSTORE: ${{ secrets.KEYSTORE }}
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          mkdir -p app
+          echo "$KEYSTORE_BASE64" | base64 -d > app/keystore.jks
+
+      - name: 🛠️ Build Release APK
+        env:
           KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASS: ${{ secrets.KEY_PASS }}
         run: |
-          echo "$KEYSTORE" | base64 -d > app/keystore.jks
-          ./gradlew assembleRelease --no-daemon
+          chmod +x gradlew
+          ./gradlew clean assembleRelease --no-daemon --parallel
 
-      - name: Sign APK (V1 + V2 + V3)
-        run: |
-          apksigner sign --ks app/keystore.jks \
-            --ks-pass pass:$KEYSTORE_PASS \
-            --key-pass pass:$KEY_PASS \
-            --ks-key-alias $KEY_ALIAS \
-            --v1-signing-enabled true \
-            --v2-signing-enabled true \
-            --v3-signing-enabled true \
-            --out app/build/outputs/apk/release/app-signed.apk \
-            app/build/outputs/apk/release/app-release-unsigned.apk
+      - name: ✅ Verify APK exists
+        run: ls -lh app/build/outputs/apk/release/*.apk
 
-      - name: Upload Artifact
+      - name: 📦 Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: UniversalPerformance-Release
-          path: app/build/outputs/apk/release/app-signed.apk
-          
+          name: UniversalPerformance-v${{ github.sha }}
+          path: app/build/outputs/apk/release/*.apk
+          retention-days: 90
+
+      - name: 🚀 Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        files: app/build/outputs/apk/release/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Universal Performance ${{ github.ref_name }}
+          body: |
+            ## 📱 Universal Performance — Release Build
+            - **Arch**: arm64-v8a only
+            - **Signing**: V1 + V2 + V3
+            - **Android**: 5.0+ (API 21)
+            - **Optimizations**: R8, resource shrinking, zipalign
+            - **Build hash**: ${{ github.sha }}
+            
