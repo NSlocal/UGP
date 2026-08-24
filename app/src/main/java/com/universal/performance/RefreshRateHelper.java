@@ -11,7 +11,9 @@ public class RefreshRateHelper {
             WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
             Display display = wm.getDefaultDisplay();
             return display.getRefreshRate();
-        } catch (Exception e) { return 60.0f; }
+        } catch (Exception e) {
+            return 60.0f;
+        }
     }
 
     public static boolean setRefreshRate(Context context, int targetRate) {
@@ -28,7 +30,9 @@ public class RefreshRateHelper {
                 }
             }
             return false;
-        } catch (Exception e) { return false; }
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public static float getMaxSupportedRefreshRate(Context context) {
@@ -38,10 +42,14 @@ public class RefreshRateHelper {
             float max = 60;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 for (Display.Mode m : display.getSupportedModes()) {
-                    if (m.getRefreshRate() > max) max = m.getRefreshRate();
+                    if (m.getRefreshRate() > max) {
+                        max = m.getRefreshRate();
+                    }
                 }
             }
             return max;
-        } catch (Exception e) { return 60; }
+        } catch (Exception e) {
+            return 60;
+        }
     }
 }
