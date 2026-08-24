@@ -31,54 +31,36 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 🔧 Create FULL Gradle Wrapper (All Files!)
+      - name: 🔧 Setup Gradle Wrapper Files
         run: |
           mkdir -p gradle/wrapper
           
-          # Step 1: Create gradle-wrapper.properties
-          cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
-distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
-networkTimeout=60000
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists
-EOF
+          # Create gradle-wrapper.properties
+          echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
+          echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
+          echo "networkTimeout=60000" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
           
-          # Step 2: Download gradle-wrapper.jar from OFFICIAL source
-          echo "📥 Downloading gradle-wrapper.jar..."
-          curl -L -o gradle/wrapper/gradle-wrapper.jar \
-            https://raw.githubusercontent.com/gradle/gradle/v8.5.0/gradle-wrapper.jar
+          # Download gradle-wrapper.jar
+          curl -L -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.5.0/gradle-wrapper.jar
           
-          # Verify JAR downloaded
+          # Verify JAR size
           JAR_SIZE=$(stat -c%s gradle/wrapper/gradle-wrapper.jar)
-          echo "✅ gradle-wrapper.jar size: $JAR_SIZE bytes"
-          if [ "$JAR_SIZE" -lt 50000 ]; then
-            echo "❌ Download failed! File too small!"
-            exit 1
-          fi
+          echo "JAR size: $JAR_SIZE bytes"
+          if [ "$JAR_SIZE" -lt 50000 ]; then exit 1; fi
           
-          # Step 3: Create gradlew script if missing
+          # Create gradlew if missing
           if [ ! -f "./gradlew" ]; then
-            echo "📄 Creating gradlew script..."
-            cat > gradlew << 'ENDSCRIPT'
-#!/bin/sh
-APP_HOME=$( cd "$(dirname "$0")" && pwd )
-CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
-if [ ! -f "$CLASSPATH" ]; then
-  echo "ERROR: $CLASSPATH not found!"; exit 1
-fi
-exec java -Xmx64m -Xms64m -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
-ENDSCRIPT
+            echo "#!/bin/sh" > gradlew
+            echo 'APP_HOME=$( cd "$(dirname "$0")" && pwd )' >> gradlew
+            echo 'CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar' >> gradlew
+            echo 'exec java -Xmx64m -Xms64m -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"' >> gradlew
           fi
           
-          # Make executable
           chmod +x ./gradlew
-          
-          # Final verification
-          echo "✅ All Gradle Wrapper files ready!"
           ls -la ./gradlew gradle/wrapper/
-        shell: bash
 
       - name: 🔑 Prepare Keystore
         env:
