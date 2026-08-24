@@ -31,24 +31,17 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 🔧 Generate Gradle Wrapper (100% Reliable!)
+      - name: 🛠️ Setup Gradle 8.5 (OFFICIAL — NO apt-get!)
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.5'
+          cache-write-only: false
+
+      - name: ✅ Verify Gradle & Wrapper
         run: |
-          # Install Gradle temporarily — generates ALL valid files automatically
-          sudo apt-get update -y
-          sudo apt-get install -y gradle
-          
-          # Generate wrapper — creates gradlew, gradle-wrapper.jar, .properties
-          gradle wrapper --gradle-version 8.5
-          
-          # Verify all files created correctly
           chmod +x ./gradlew
-          JAR_SIZE=$(stat -c%s gradle/wrapper/gradle-wrapper.jar)
-          echo "✅ gradle-wrapper.jar size: $JAR_SIZE bytes"
-          if [ "$JAR_SIZE" -lt 50000 ]; then
-            echo "❌ JAR too small — generation failed!"
-            exit 1
-          fi
-          ls -la ./gradlew gradle/wrapper/
+          ./gradlew --version
+          ls -la gradle/wrapper/
 
       - name: 🔑 Prepare Keystore
         env:
