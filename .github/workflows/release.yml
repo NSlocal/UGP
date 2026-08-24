@@ -30,26 +30,19 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: gradle
 
-      - name: 🔧 Generate Correct Gradle Wrapper
+      - name: 🛠️ Setup Gradle Wrapper (OFFICIAL & FAST!)
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.5'
+          generate-wrapper: true
+          cache-read-only: false
+
+      - name: ✅ Verify Gradle files
         run: |
-          mkdir -p gradle/wrapper
-          
-          # Install Gradle temporarily to generate the proper wrapper files
-          if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ] || [ $(stat -c%s gradle/wrapper/gradle-wrapper.jar) -lt 100000 ]; then
-            echo "📦 Installing Gradle to generate proper wrapper..."
-            sudo apt-get update -y
-            sudo apt-get install -y gradle
-            
-            # Generate ALL proper wrapper files (including valid JAR)
-            gradle wrapper --gradle-version 8.5 --no-daemon
-            echo "✅ Gradle Wrapper generated with correct JAR file"
-          fi
-          
-          # Always make gradlew executable
           chmod +x ./gradlew
           ls -la ./gradlew gradle/wrapper/
+          ./gradlew --version
 
       - name: 🔑 Prepare Keystore
         env:
@@ -71,7 +64,6 @@ jobs:
           ./gradlew clean assembleRelease \
             --no-daemon \
             --parallel \
-            --build-cache \
             --stacktrace
 
       - name: ✅ Verify APK
