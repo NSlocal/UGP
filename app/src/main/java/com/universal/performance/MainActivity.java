@@ -7,204 +7,124 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
-
-    private Switch switchService;
-    private Switch switchAntiLag;
-    private Switch switchGpuAccel;
-    private Switch switchGpuAntiLag;
-    private Switch switchDndMode;
-    private Switch switchRamBoost;
-    private Switch switchFpsOverlay;
-    private Switch switchRefreshRate;
-    private TextView textStatus;
-    private TextView textDeviceInfo;
-    private TextView textFps;
-    private TextView textTemp;
-    private TextView textNetwork;
-    private TextView textRefreshRateInfo;
-
+    private Switch sService, sAntiLag, sGpuAccel, sGpuAntiLag, sDnd, sRam, sFps, sRefresh;
+    private TextView tStatus, tDevice, tFps, tTemp, tNet, tRefreshRate;
     private SharedPreferences prefs;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreate(Bundle b) {
+        super.onCreate(b);
         setContentView(R.layout.activity_main);
-
         prefs = getSharedPreferences("Prefs", MODE_PRIVATE);
 
-        // Check Overlay Permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-            startActivity(intent);
+            startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION));
         }
 
-        // Init Views
-        switchService = findViewById(R.id.switch_service);
-        switchAntiLag = findViewById(R.id.switch_anti_lag);
-        switchGpuAccel = findViewById(R.id.switch_gpu_accel);
-        switchGpuAntiLag = findViewById(R.id.switch_gpu_anti_lag);
-        switchDndMode = findViewById(R.id.switch_dnd_mode);
-        switchRamBoost = findViewById(R.id.switch_ram_boost);
-        switchFpsOverlay = findViewById(R.id.switch_fps_overlay);
-        switchRefreshRate = findViewById(R.id.switch_refresh_rate);
-        textStatus = findViewById(R.id.text_status);
-        textDeviceInfo = findViewById(R.id.text_device_info);
-        textFps = findViewById(R.id.text_fps);
-        textTemp = findViewById(R.id.text_temp);
-        textNetwork = findViewById(R.id.text_network);
-        textRefreshRateInfo = findViewById(R.id.text_refresh_rate);
+        sService = findViewById(R.id.switch_service);
+        sAntiLag = findViewById(R.id.switch_anti_lag);
+        sGpuAccel = findViewById(R.id.switch_gpu_accel);
+        sGpuAntiLag = findViewById(R.id.switch_gpu_anti_lag);
+        sDnd = findViewById(R.id.switch_dnd_mode);
+        sRam = findViewById(R.id.switch_ram_boost);
+        sFps = findViewById(R.id.switch_fps_overlay);
+        sRefresh = findViewById(R.id.switch_refresh_rate);
+        tStatus = findViewById(R.id.text_status);
+        tDevice = findViewById(R.id.text_device_info);
+        tFps = findViewById(R.id.text_fps);
+        tTemp = findViewById(R.id.text_temp);
+        tNet = findViewById(R.id.text_network);
+        tRefreshRate = findViewById(R.id.text_refresh_rate);
 
-        // Load saved states
-        switchService.setChecked(prefs.getBoolean("service_running", false));
-        switchAntiLag.setChecked(prefs.getBoolean("anti_lag", false));
-        switchGpuAccel.setChecked(prefs.getBoolean("gpu_accel", false));
-        switchGpuAntiLag.setChecked(prefs.getBoolean("gpu_anti_lag", false));
-        switchDndMode.setChecked(prefs.getBoolean("dnd_mode", false));
-        switchRamBoost.setChecked(prefs.getBoolean("ram_boost", false));
-        switchFpsOverlay.setChecked(prefs.getBoolean("fps_overlay", false));
-        switchRefreshRate.setChecked(prefs.getBoolean("refresh_rate_unlock", false));
+        sService.setChecked(prefs.getBoolean("service_running", false));
+        sAntiLag.setChecked(prefs.getBoolean("anti_lag", false));
+        sGpuAccel.setChecked(prefs.getBoolean("gpu_accel", false));
+        sGpuAntiLag.setChecked(prefs.getBoolean("gpu_anti_lag", false));
+        sDnd.setChecked(prefs.getBoolean("dnd_mode", false));
+        sRam.setChecked(prefs.getBoolean("ram_boost", false));
+        sFps.setChecked(prefs.getBoolean("fps_overlay", false));
+        sRefresh.setChecked(prefs.getBoolean("refresh_unlock", false));
 
-        // Device Info
-        float maxRR = RefreshRateHelper.getMaxSupportedRefreshRate(this);
-        textDeviceInfo.setText("Device: " + Build.MODEL + "\nSDK: " + Build.VERSION.SDK_INT + 
-            "\nMax Refresh: " + (int)maxRR + "Hz");
-        textRefreshRateInfo.setText("Current: " + (int)RefreshRateHelper.getCurrentRefreshRate(this) + "Hz");
+        tDevice.setText("Device: " + Build.MODEL + "\nSDK: " + Build.VERSION.SDK_INT +
+            "\nMax Refresh: " + (int)RefreshRateHelper.getMax(this) + "Hz");
+        tRefreshRate.setText("Current: " + (int)RefreshRateHelper.getCurrent(this) + "Hz");
 
-        // Service Toggle
-        switchService.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Intent serviceIntent = new Intent(this, PerformanceService.class);
+        sService.setOnCheckedChangeListener((v, isChecked) -> {
             if (isChecked) {
-                startService(serviceIntent);
-                textStatus.setText("Status: Running");
+                startService(new Intent(this, PerformanceService.class));
+                tStatus.setText("Status: Running");
                 prefs.edit().putBoolean("service_running", true).apply();
-                Toast.makeText(this, "✅ Performance Service ACTIVE", Toast.LENGTH_SHORT).show();
             } else {
-                stopService(serviceIntent);
+                stopService(new Intent(this, PerformanceService.class));
                 stopService(new Intent(this, FpsOverlayService.class));
-                textStatus.setText("Status: Stopped");
+                tStatus.setText("Status: Stopped");
                 prefs.edit().putBoolean("service_running", false).apply();
-                Toast.makeText(this, "❌ Performance Service STOPPED", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // Anti Lag
-        switchAntiLag.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            prefs.edit().putBoolean("anti_lag", isChecked).apply();
-            sendConfigToService();
-        });
-
-        // GPU Acceleration
-        switchGpuAccel.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            prefs.edit().putBoolean("gpu_accel", isChecked).apply();
-            sendConfigToService();
-        });
-
-        // GPU Anti Lag
-        switchGpuAntiLag.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            prefs.edit().putBoolean("gpu_anti_lag", isChecked).apply();
-            sendConfigToService();
-        });
-
-        // DND Mode + Notification Killer
-        switchDndMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            prefs.edit().putBoolean("dnd_mode", isChecked).apply();
-            sendConfigToService();
-            Toast.makeText(this, isChecked ? "🔕 DND & Notif Killer ON" : "🔔 DND OFF", Toast.LENGTH_SHORT).show();
-        });
-
-        // RAM Background Anti Lag
-        switchRamBoost.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            prefs.edit().putBoolean("ram_boost", isChecked).apply();
-            sendConfigToService();
-            Toast.makeText(this, isChecked ? "🚀 RAM Boost ON" : "RAM Boost OFF", Toast.LENGTH_SHORT).show();
-        });
-
-        // FPS Overlay
-        switchFpsOverlay.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            prefs.edit().putBoolean("fps_overlay", isChecked).apply();
+        sAntiLag.setOnCheckedChangeListener((v, i) -> { prefs.edit().putBoolean("anti_lag", i).apply(); sendUpdate(); });
+        sGpuAccel.setOnCheckedChangeListener((v, i) -> { prefs.edit().putBoolean("gpu_accel", i).apply(); sendUpdate(); });
+        sGpuAntiLag.setOnCheckedChangeListener((v, i) -> { prefs.edit().putBoolean("gpu_anti_lag", i).apply(); sendUpdate(); });
+        sDnd.setOnCheckedChangeListener((v, i) -> { prefs.edit().putBoolean("dnd_mode", i).apply(); sendUpdate(); });
+        sRam.setOnCheckedChangeListener((v, i) -> { prefs.edit().putBoolean("ram_boost", i).apply(); sendUpdate(); });
+        sRefresh.setOnCheckedChangeListener((v, i) -> { prefs.edit().putBoolean("refresh_unlock", i).apply(); sendUpdate(); });
+        sFps.setOnCheckedChangeListener((v, isChecked) -> {
             if (isChecked && prefs.getBoolean("service_running", false)) {
                 startService(new Intent(this, FpsOverlayService.class));
-                Toast.makeText(this, "📊 FPS Overlay ON", Toast.LENGTH_SHORT).show();
-            } else {
-                stopService(new Intent(this, FpsOverlayService.class));
-            }
+            } else stopService(new Intent(this, FpsOverlayService.class));
         });
 
-        // 📱 Refresh Rate Unlock
-        switchRefreshRate.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            prefs.edit().putBoolean("refresh_rate_unlock", isChecked).apply();
-            sendConfigToService();
-            Toast.makeText(this, isChecked ? "📱 Refresh Rate Unlock ON (90-120Hz)" : "Refresh Rate Unlock OFF", Toast.LENGTH_SHORT).show();
-            textRefreshRateInfo.setText("Current: " + (int)RefreshRateHelper.getCurrentRefreshRate(this) + "Hz");
-        });
-
-        // Start real-time update
-        startRealtimeUpdate();
+        startRealtime();
     }
 
-    private void sendConfigToService() {
-        Intent intent = new Intent("com.universal.performance.UPDATE_CONFIG");
-        intent.putExtra("anti_lag", prefs.getBoolean("anti_lag", false));
-        intent.putExtra("gpu_accel", prefs.getBoolean("gpu_accel", false));
-        intent.putExtra("gpu_anti_lag", prefs.getBoolean("gpu_anti_lag", false));
-        intent.putExtra("dnd_mode", prefs.getBoolean("dnd_mode", false));
-        intent.putExtra("ram_boost", prefs.getBoolean("ram_boost", false));
-        intent.putExtra("refresh_rate_unlock", prefs.getBoolean("refresh_rate_unlock", false));
-        sendBroadcast(intent);
+    private void sendUpdate() {
+        Intent i = new Intent("com.universal.performance.UPDATE_CONFIG");
+        i.putExtra("anti_lag", prefs.getBoolean("anti_lag", false));
+        i.putExtra("gpu_accel", prefs.getBoolean("gpu_accel", false));
+        i.putExtra("gpu_anti_lag", prefs.getBoolean("gpu_anti_lag", false));
+        i.putExtra("dnd_mode", prefs.getBoolean("dnd_mode", false));
+        i.putExtra("ram_boost", prefs.getBoolean("ram_boost", false));
+        i.putExtra("refresh_rate_unlock", prefs.getBoolean("refresh_unlock", false));
+        sendBroadcast(i);
     }
 
-    private void startRealtimeUpdate() {
-        android.os.Handler handler = new android.os.Handler();
-        Runnable update = new Runnable() {
-            @Override
-            public void run() {
-                updateStats();
-                handler.postDelayed(this, 500);
-            }
-        };
-        handler.post(update);
+    private void startRealtime() {
+        android.os.Handler h = new android.os.Handler();
+        h.post(new Runnable() { public void run() { updateStats(); h.postDelayed(this, 500); }});
     }
 
     private void updateStats() {
-        textFps.setText("FPS: ~60");
-        float temp = getCpuTemperature();
-        textTemp.setText("Suhu: " + String.format("%.1f°C", temp));
-        textNetwork.setText("WiFi: " + getWifiStatus() + " | Data: " + getNetworkType());
-        textRefreshRateInfo.setText("Current: " + (int)RefreshRateHelper.getCurrentRefreshRate(this) + "Hz");
+        tFps.setText("FPS: ~60");
+        tTemp.setText("Suhu: " + String.format("%.1f°C", getCpuTemp()));
+        tNet.setText("WiFi: " + getWifi() + " | Data: " + getData());
+        tRefreshRate.setText("Current: " + (int)RefreshRateHelper.getCurrent(this) + "Hz");
     }
 
-    private float getCpuTemperature() {
+    private float getCpuTemp() {
         try {
-            String[] paths = {
-                "/sys/class/thermal/thermal_zone0/temp",
-                "/sys/class/thermal/thermal_zone1/temp"
-            };
-            for (String path : paths) {
-                java.io.File file = new java.io.File(path);
-                if (file.exists()) {
-                    java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(file));
-                    String line = br.readLine();
-                    br.close();
-                    return Float.parseFloat(line) / 1000f;
+            for (String p : new String[]{"/sys/class/thermal/thermal_zone0/temp", "/sys/class/thermal/thermal_zone1/temp"}) {
+                java.io.File f = new java.io.File(p);
+                if (f.exists()) {
+                    java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(f));
+                    float t = Float.parseFloat(br.readLine()) / 1000f; br.close(); return t;
                 }
             }
         } catch (Exception e) {}
-        return 35.0f;
+        return 35;
     }
 
-    private String getWifiStatus() {
+    private String getWifi() {
         android.net.ConnectivityManager cm = (android.net.ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        android.net.NetworkInfo wifi = cm.getNetworkInfo(android.net.ConnectivityManager.TYPE_WIFI);
-        return wifi != null && wifi.isConnected() ? "ON" : "OFF";
+        android.net.NetworkInfo w = cm.getNetworkInfo(android.net.ConnectivityManager.TYPE_WIFI);
+        return w != null && w.isConnected() ? "ON" : "OFF";
     }
 
-    private String getNetworkType() {
+    private String getData() {
         android.net.ConnectivityManager cm = (android.net.ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        android.net.NetworkInfo mobile = cm.getNetworkInfo(android.net.ConnectivityManager.TYPE_MOBILE);
-        return mobile != null && mobile.isConnected() ? "ON" : "OFF";
+        android.net.NetworkInfo m = cm.getNetworkInfo(android.net.ConnectivityManager.TYPE_MOBILE);
+        return m != null && m.isConnected() ? "ON" : "OFF";
     }
 }
