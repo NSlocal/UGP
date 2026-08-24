@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Universal Performance</string>
-    <!-- Replace YOUR app name above -->
-    
-    <!-- Example: if you had "Game & Tools" → change to "Game &amp; Tools" -->
-    <!-- <string name="example">Game &amp; Tools</string> -->
+    <!-- Replace any & with &amp; below -->
+    <!-- Example: <string name="example">Game &amp; Tools</string> -->
 </resources>
