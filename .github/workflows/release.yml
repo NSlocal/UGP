@@ -32,36 +32,26 @@ jobs:
           java-version: '17'
           cache: gradle
 
-      - name: 🔧 Auto-Fix Gradle Wrapper
+      - name: 🔧 Fix Gradle Wrapper
         run: |
-          echo "📂 Checking Gradle Wrapper files..."
           mkdir -p gradle/wrapper
           
-          # Download missing gradle-wrapper.jar
+          # Download gradle-wrapper.jar directly
           if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
-            echo "📥 Downloading gradle-wrapper.jar..."
-            curl -L -o gradle/wrapper/gradle-wrapper.jar \
-              https://raw.githubusercontent.com/gradle/gradle/v8.5.0/gradle-wrapper.jar
-            echo "✅ gradle-wrapper.jar downloaded"
+            curl -L -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.5.0/gradle-wrapper.jar
           fi
           
-          # Create gradle-wrapper.properties if missing
+          # Create properties file using echo (NO heredoc!)
           if [ ! -f "gradle/wrapper/gradle-wrapper.properties" ]; then
-            echo "📄 Creating gradle-wrapper.properties..."
-            cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
-distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
-networkTimeout=60000
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists
-EOF
-            echo "✅ gradle-wrapper.properties created"
+            echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
+            echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+            echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
+            echo "networkTimeout=60000" >> gradle/wrapper/gradle-wrapper.properties
+            echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
+            echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
           fi
           
-          # Make gradlew executable
           chmod +x ./gradlew
-          echo "✅ All Gradle Wrapper files ready!"
           ls -la ./gradlew gradle/wrapper/
 
       - name: 🔑 Prepare Keystore
@@ -70,11 +60,8 @@ EOF
         run: |
           mkdir -p app
           if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "✅ Decoding keystore..."
             echo "$KEYSTORE_BASE64" | base64 -d > app/keystore.jks
-            ls -lh app/keystore.jks
           else
-            echo "⚠️ No KEYSTORE_BASE64 — building UNSIGNED APK"
             touch app/keystore.jks
           fi
 
@@ -90,27 +77,20 @@ EOF
             --build-cache \
             --stacktrace
 
-      - name: ✅ Verify Built APK
+      - name: ✅ Verify APK
         run: |
           APK_DIR="app/build/outputs/apk/release"
-          if [ ! -d "$APK_DIR" ]; then
-            echo "❌ ERROR: APK directory missing!"
-            exit 1
-          fi
-          echo "✅ APK files found:"
-          ls -lh "$APK_DIR"/*.apk || {
-            echo "❌ No APK files generated!"
-            exit 1
-          }
+          [ -d "$APK_DIR" ] || exit 1
+          ls -lh "$APK_DIR"/*.apk || exit 1
 
-      - name: 📦 Upload APK Artifact
+      - name: 📦 Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: UniversalPerformance-Release
           path: app/build/outputs/apk/release/*.apk
           retention-days: 90
 
-      - name: 🚀 Create GitHub Release
+      - name: 🚀 Create Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         env:
@@ -119,11 +99,4 @@ EOF
           name: Universal Performance ${{ github.ref_name }}
           generate_release_notes: true
           files: app/build/outputs/apk/release/*.apk
-          body: |
-            ## ✅ Build Success — Universal Performance
-            - **Package**: `com.universal.performance`
-            - **Arch**: `arm64-v8a` only
-            - **Signing**: V1 + V2 + V3
-            - **Android**: 5.0+ (API 21) — 16+
-            - **Optimizations**: R8, ProGuard, zipalign
-            - **Build SHA**: `${{ github.sha }}`
+          
