@@ -4,8 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="#CC000000"
-    android:padding="8dp"
-    android:elevation="8dp">
+    android:padding="8dp">
 
     <TextView
         android:id="@+id/overlay_fps"
