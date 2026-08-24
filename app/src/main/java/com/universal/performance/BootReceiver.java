@@ -7,17 +7,13 @@ import android.content.SharedPreferences;
 import android.os.Build;
 
 public class BootReceiver extends BroadcastReceiver {
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
-            SharedPreferences prefs = context.getSharedPreferences("Prefs", Context.MODE_PRIVATE);
-            if (prefs.getBoolean("service_running", false)) {
-                Intent serviceIntent = new Intent(context, PerformanceService.class);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(serviceIntent);
-                } else {
-                    context.startService(serviceIntent);
-                }
+    @Override public void onReceive(Context c, Intent i) {
+        if (Intent.ACTION_BOOT_COMPLETED.equals(i.getAction())) {
+            SharedPreferences p = c.getSharedPreferences("Prefs", Context.MODE_PRIVATE);
+            if (p.getBoolean("service_running", false)) {
+                Intent si = new Intent(c, PerformanceService.class);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) c.startForegroundService(si);
+                else c.startService(si);
             }
         }
     }
