@@ -8,7 +8,7 @@
     <string name="dnd_mode">DND & Notif Killer</string>
     <string name="ram_boost">RAM Background Anti Lag</string>
     <string name="fps_overlay">FPS Real-time Overlay</string>
-    <string name="refresh_rate_unlock">Refresh Rate Unlock (90-120Hz)</string>
+    <string name="refresh_rate_unlock">Refresh Rate Unlock</string>
     <string name="status_running">Status: Running</string>
     <string name="status_stopped">Status: Stopped</string>
 </resources>
