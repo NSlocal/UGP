@@ -13,128 +13,78 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 public class FpsOverlayService extends Service {
-    private WindowManager windowManager;
-    private View overlayView;
-    private TextView fpsText;
-    private TextView tempText;
-    private TextView netText;
-    private TextView refreshText;
-    private Handler handler;
-    private long lastTime = System.nanoTime();
+    private WindowManager wm;
+    private View view;
+    private TextView fps, temp, net, refresh;
+    private Handler h;
     private int frameCount = 0;
+    private long lastTime = System.nanoTime();
 
-    @Override
-    public void onCreate() {
+    @Override public void onCreate() {
         super.onCreate();
-        handler = new Handler();
+        h = new Handler();
         createOverlay();
-        startFpsCounter();
+        startCounter();
     }
 
     private void createOverlay() {
-        windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-        
-        LayoutInflater inflater = LayoutInflater.from(this);
-        overlayView = inflater.inflate(R.layout.overlay_fps, null);
-        
-        fpsText = overlayView.findViewById(R.id.overlay_fps);
-        tempText = overlayView.findViewById(R.id.overlay_temp);
-        netText = overlayView.findViewById(R.id.overlay_network);
-        refreshText = overlayView.findViewById(R.id.overlay_refresh);
+        wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        view = LayoutInflater.from(this).inflate(R.layout.overlay_fps, null);
+        fps = view.findViewById(R.id.overlay_fps);
+        temp = view.findViewById(R.id.overlay_temp);
+        net = view.findViewById(R.id.overlay_network);
+        refresh = view.findViewById(R.id.overlay_refresh);
 
-        int layoutFlag = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O 
-            ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY 
-            : WindowManager.LayoutParams.TYPE_PHONE;
-
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            layoutFlag,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-            PixelFormat.TRANSLUCENT
-        );
-        
-        params.gravity = Gravity.TOP | Gravity.START;
-        params.x = 20;
-        params.y = 50;
-
-        windowManager.addView(overlayView, params);
+        int type = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? 
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_PHONE;
+        WindowManager.LayoutParams p = new WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,
+            type, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            PixelFormat.TRANSLUCENT);
+        p.gravity = Gravity.TOP | Gravity.START;
+        p.x = 20; p.y = 50;
+        wm.addView(view, p);
     }
 
-    private void startFpsCounter() {
-        Runnable fpsRunnable = new Runnable() {
-            @Override
-            public void run() {
-                updateFps();
-                updateTemp();
-                updateNetwork();
-                updateRefreshRate();
-                handler.postDelayed(this, 500);
-            }
-        };
-        handler.post(fpsRunnable);
+    private void startCounter() {
+        h.post(new Runnable() { public void run() { updateAll(); h.postDelayed(this, 500); }});
     }
 
-    private void updateFps() {
+    private void updateAll() {
         frameCount++;
         long now = System.nanoTime();
-        double elapsed = (now - lastTime) / 1_000_000_000.0;
-        
-        if (elapsed >= 1.0) {
-            int fps = (int) Math.round(frameCount / elapsed);
-            fpsText.setText("FPS: " + fps);
-            frameCount = 0;
-            lastTime = now;
+        if ((now - lastTime) / 1e9 >= 1.0) {
+            fps.setText("FPS: " + frameCount);
+            frameCount = 0; lastTime = now;
         }
+        temp.setText(String.format("%.1f°C", getTemp()));
+        net.setText("WiFi: " + getWifi());
+        refresh.setText((int)RefreshRateHelper.getCurrent(this) + "Hz");
     }
 
-    private void updateTemp() {
-        float temp = getCpuTemp();
-        tempText.setText(String.format("%.1f°C", temp));
-    }
-
-    private void updateNetwork() {
-        netText.setText("WiFi: " + getWifiStatus());
-    }
-
-    private void updateRefreshRate() {
-        float rate = RefreshRateHelper.getCurrentRefreshRate(this);
-        refreshText.setText((int)rate + "Hz");
-    }
-
-    private float getCpuTemp() {
+    private float getTemp() {
         try {
-            String[] paths = {"/sys/class/thermal/thermal_zone0/temp", "/sys/class/thermal/thermal_zone1/temp"};
-            for (String p : paths) {
+            for (String p : new String[]{"/sys/class/thermal/thermal_zone0/temp", "/sys/class/thermal/thermal_zone1/temp"}) {
                 java.io.File f = new java.io.File(p);
                 if (f.exists()) {
                     java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(f));
-                    float t = Float.parseFloat(br.readLine()) / 1000f;
-                    br.close();
-                    return t;
+                    float t = Float.parseFloat(br.readLine()) / 1000f; br.close(); return t;
                 }
             }
         } catch (Exception e) {}
-        return 36.0f;
+        return 36;
     }
 
-    private String getWifiStatus() {
+    private String getWifi() {
         android.net.ConnectivityManager cm = (android.net.ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        android.net.NetworkInfo wifi = cm.getNetworkInfo(android.net.ConnectivityManager.TYPE_WIFI);
-        return wifi != null && wifi.isConnected() ? "ON" : "OFF";
+        android.net.NetworkInfo w = cm.getNetworkInfo(android.net.ConnectivityManager.TYPE_WIFI);
+        return w != null && w.isConnected() ? "ON" : "OFF";
     }
 
-    @Override
-    public void onDestroy() {
+    @Override public void onDestroy() {
         super.onDestroy();
-        if (overlayView != null && windowManager != null) {
-            windowManager.removeView(overlayView);
-        }
-        handler.removeCallbacksAndMessages(null);
+        if (view != null) wm.removeView(view);
+        h.removeCallbacksAndMessages(null);
     }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
+    @Override public IBinder onBind(Intent i) { return null; }
 }
