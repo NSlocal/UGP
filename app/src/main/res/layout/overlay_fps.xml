@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#CC000000"
+    android:padding="8dp"
+    android:elevation="8dp">
+
+    <TextView
+        android:id="@+id/overlay_fps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FPS: 60"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#00FF00"/>
+
+    <TextView
+        android:id="@+id/overlay_temp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="36.0°C"
+        android:textSize="12sp"
+        android:textColor="#FFCC00"/>
+
+    <TextView
+        android:id="@+id/overlay_network"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="WiFi: ON"
+        android:textSize="12sp"
+        android:textColor="#00CCFF"/>
+
+    <TextView
+        android:id="@+id/overlay_refresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="60Hz"
+        android:textSize="12sp"
+        android:textColor="#FF66FF"/>
+
+</LinearLayout>
