@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Universal Performance</string>
-    <!-- Replace any & with &amp; below -->
-    <!-- Example: <string name="example">Game &amp; Tools</string> -->
+    <string name="performance_service">Performance Service</string>
+    <string name="anti_lag">Anti Lag Mode</string>
+    <string name="gpu_accel">GPU Acceleration</string>
+    <string name="gpu_anti_lag">GPU Anti Lag</string>
+    <string name="dnd_mode">DND & Notif Killer</string>
+    <string name="ram_boost">RAM Background Anti Lag</string>
+    <string name="fps_overlay">FPS Real-time Overlay</string>
+    <string name="refresh_rate_unlock">Refresh Rate Unlock (90-120Hz)</string>
+    <string name="status_running">Status: Running</string>
+    <string name="status_stopped">Status: Stopped</string>
 </resources>
