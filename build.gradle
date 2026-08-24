@@ -1,12 +1,4 @@
-plugins {
-    id 'com.android.application' version '8.2.0' apply false
-    id 'com.android.library' version '8.2.0' apply false
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-
+// ✅ FIRST: buildscript {} — MUST COME FIRST!
 buildscript {
     repositories {
         google()
@@ -15,6 +7,16 @@ buildscript {
     dependencies {
         classpath "com.android.tools.build:gradle:8.2.0"
     }
+}
+
+// ✅ SECOND: plugins {} — MUST COME AFTER buildscript!
+plugins {
+    id 'com.android.application' version '8.2.0' apply false
+    id 'com.android.library' version '8.2.0' apply false
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
 
 allprojects {
