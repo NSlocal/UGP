@@ -3,8 +3,9 @@ plugins {
 }
 
 android {
-    namespace 'com.universal.performance'
+    namespace "com.universal.performance"
     compileSdk 34
+
     defaultConfig {
         applicationId "com.universal.performance"
         minSdk 21
@@ -12,26 +13,21 @@ android {
         versionCode 1
         versionName "1.0.0"
     }
-    signingConfigs {
-        release {
-            storeFile file("keystore.jks")
-            storePassword System.getenv("KEYSTORE_PASS")
-            keyAlias System.getenv("KEY_ALIAS")
-            keyPassword System.getenv("KEY_PASS")
-        }
-    }
+
     buildTypes {
         release {
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
 }
+
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
