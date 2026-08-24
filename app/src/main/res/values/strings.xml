@@ -5,7 +5,7 @@
     <string name="anti_lag">Anti Lag Mode</string>
     <string name="gpu_accel">GPU Acceleration</string>
     <string name="gpu_anti_lag">GPU Anti Lag</string>
-    <string name="dnd_mode">DND & Notif Killer</string>
+    <string name="dnd_mode">DND &amp; Notif Killer</string>
     <string name="ram_boost">RAM Background Anti Lag</string>
     <string name="fps_overlay">FPS Real-time Overlay</string>
     <string name="refresh_rate_unlock">Refresh Rate Unlock</string>
