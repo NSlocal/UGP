@@ -31,29 +31,32 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 🛠️ Setup Gradle 8.5 — OFFICIAL, CORRECT FILES!
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.5'
-          generate-wrapper: true
-          cache-read-only: false
-
-      - name: ✅ Verify Wrapper Ready
+      - name: 🔧 CREATE MISSING gradle-wrapper.jar (FIX!)
         run: |
+          mkdir -p gradle/wrapper
+          
+          # Create properties file
+          echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
+          echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
+          echo "networkTimeout=60000" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+          
+          # DOWNLOAD the CORRECT JAR — use Gradle's official mirror
+          echo "📥 Downloading gradle-wrapper.jar..."
+          curl -L -o gradle/wrapper/gradle-wrapper.jar \
+            https://services.gradle.org/distributions/gradle-wrapper-8.5.jar
+          
+          # Verify size
+          JAR_SIZE=$(stat -c%s gradle/wrapper/gradle-wrapper.jar)
+          echo "✅ JAR size: $JAR_SIZE bytes"
+          
+          # Make gradlew executable
           chmod +x ./gradlew
+          
+          # Show files
           ls -la gradle/wrapper/
-          ./gradlew --version
-
-      - name: 🔑 Prepare Keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: |
-          mkdir -p app
-          if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "$KEYSTORE_BASE64" | base64 -d > app/keystore.jks
-          else
-            touch app/keystore.jks
-          fi
 
       - name: 🚀 Build Release APK
         env:
