@@ -243,4 +243,3 @@ jobs:
             - **Android**: 5.0+ (API 21)
             - **Optimizations**: R8, resource shrinking, zipalign
             - **Build hash**: ${{ github.sha }}
-            
