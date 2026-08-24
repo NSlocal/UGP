@@ -8,8 +8,6 @@ buildscript {
     }
 }
 
-// ❌ HAPUS SEMUA BLOK allprojects { repositories { ... } } — INI PENYEBAB ERROR!
-
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
