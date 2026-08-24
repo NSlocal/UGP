@@ -29,7 +29,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 🔧 AUTO-CREATE ALL GRADLE WRAPPER FILES!
+      - name: 🔧 GENERATE CORRECT WRAPPER — NO MANUAL FILES NEEDED
         run: |
           sudo apt-get update -y
           sudo apt-get install -y gradle
