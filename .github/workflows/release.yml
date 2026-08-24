@@ -29,24 +29,16 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 🛠️ Setup CORRECT Gradle 8.5 — NO apt-get!
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.5'
-
-      - name: 🔧 Fix permissions
+      - name: 🔧 AUTO-CREATE ALL WRAPPER FILES — NO JAR NEEDED!
         run: |
+          cd /tmp
+          wget -q https://services.gradle.org/distributions/gradle-8.5-bin.zip
+          unzip -q gradle-8.5-bin.zip
+          export PATH=$PATH:/tmp/gradle-8.5/bin
+          cd $GITHUB_WORKSPACE
+          gradle wrapper --gradle-version 8.5
           chmod +x ./gradlew
           ls -la gradle/wrapper/
-
-      - name: 🔑 Prepare Keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: |
-          mkdir -p app
-          if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "$KEYSTORE_BASE64" | base64 -d > app/keystore.jks
-          fi
 
       - name: 🚀 Build Release APK
         env:
