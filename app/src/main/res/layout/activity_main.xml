@@ -3,12 +3,92 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center">
+    android:padding="24dp"
+    android:gravity="center_horizontal"
+    android:background="#F5F5F5">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Universal Performance &amp; Tools"
-        android:textSize="24sp"/>
+        android:text="Universal Performance"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="40dp"
+        android:textColor="#212121"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#FFFFFF"
+        android:padding="20dp"
+        android:layout_marginBottom="16dp"
+        android:elevation="2dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Controls"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"
+            android:textColor="#424242"/>
+
+        <Switch
+            android:id="@+id/switch_service"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Performance Service"
+            android:layout_marginBottom="16dp"/>
+
+        <Switch
+            android:id="@+id/switch_anti_lag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Anti Lag Mode"
+            android:layout_marginBottom="16dp"/>
+
+        <Switch
+            android:id="@+id/switch_gpu_accel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="GPU Acceleration"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#FFFFFF"
+        android:padding="20dp"
+        android:elevation="2dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"
+            android:textColor="#424242"/>
+
+        <TextView
+            android:id="@+id/text_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Status: Stopped"
+            android:textSize="15sp"
+            android:layout_marginBottom="12dp"
+            android:textColor="#757575"/>
+
+        <TextView
+            android:id="@+id/text_device_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#757575"/>
+
+    </LinearLayout>
 
 </LinearLayout>
