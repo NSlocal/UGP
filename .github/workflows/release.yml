@@ -31,15 +31,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 🛠️ Setup Gradle 8.5 — OFFICIAL & CORRECT!
+      - name: 🛠️ Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.5'
+          validate-wrappers: true
 
-      - name: 🔧 Fix Wrapper & Permissions — ONE STEP!
-        run: |
-          chmod +x ./gradlew
-          ls -la gradle/wrapper/
+      - name: 🔧 Fix Permissions
+        run: chmod +x ./gradlew
 
       - name: 🔑 Prepare Keystore
         env:
@@ -57,11 +56,7 @@ jobs:
           KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASS: ${{ secrets.KEY_PASS }}
-        run: |
-          ./gradlew clean assembleRelease \
-            --no-daemon \
-            --parallel \
-            --stacktrace
+        run: ./gradlew clean assembleRelease --no-daemon --stacktrace
 
       - name: ✅ Verify APK
         run: |
