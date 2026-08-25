@@ -27,7 +27,7 @@ public class FpsOverlayService extends Service {
         super.onCreate();
         h = new Handler();
         createOverlay();
-        startUpdateLoop();
+        startLoop();
     }
 
     private void createOverlay() {
@@ -40,67 +40,51 @@ public class FpsOverlayService extends Service {
 
         int type = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ?
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_PHONE;
-        
         WindowManager.LayoutParams p = new WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            type,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,
+            type, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
             PixelFormat.TRANSLUCENT);
-        p.gravity = Gravity.TOP | Gravity.START;
-        p.x = 16; p.y = 40;
+        p.gravity = Gravity.TOP | Gravity.START; p.x = 16; p.y = 40;
         wm.addView(view, p);
     }
 
-    private void startUpdateLoop() {
+    private void startLoop() {
         h.post(new Runnable() {
             @Override public void run() {
-                updateAllValues();
+                updateAll();
                 h.postDelayed(this, 500);
             }
         });
     }
 
-    private void updateAllValues() {
-        // FPS Calculate
+    private void updateAll() {
         frameCount++;
         long now = System.nanoTime();
         if ((now - lastSecond) / 1_000_000_000L >= 1) {
             fpsTv.setText("FPS: " + frameCount);
-            frameCount = 0;
-            lastSecond = now;
+            frameCount = 0; lastSecond = now;
         }
-
-        // Temperature
-        tempTv.setText(String.format("%.1f°C", getCpuTemp()));
-
-        // Network Status
-        netTv.setText("WiFi: " + getWifiStatus());
-
-        // Refresh Rate
-        refreshTv.setText((int) RefreshRateHelper.getCurrent(this) + "Hz");
+        tempTv.setText(String.format("%.1f°C", getTemp()));
+        netTv.setText("WiFi: " + getWifi());
+        refreshTv.setText((int)RefreshRateHelper.getCurrent(this) + "Hz");
     }
 
-    private float getCpuTemp() {
+    private float getTemp() {
         try {
-            String[] paths = {
-                "/sys/class/thermal/thermal_zone0/temp",
-                "/sys/class/thermal/thermal_zone1/temp"
-            };
+            String[] paths = {"/sys/class/thermal/thermal_zone0/temp", "/sys/class/thermal/thermal_zone1/temp"};
             for (String p : paths) {
                 java.io.File f = new java.io.File(p);
                 if (f.exists()) {
                     java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(f));
                     float t = Float.parseFloat(br.readLine()) / 1000f;
-                    br.close();
-                    return t;
+                    br.close(); return t;
                 }
             }
         } catch (Exception e) {}
         return 36.0f;
     }
 
-    private String getWifiStatus() {
+    private String getWifi() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             android.net.Network n = cm.getActiveNetwork();
@@ -115,6 +99,5 @@ public class FpsOverlayService extends Service {
         if (view != null) wm.removeView(view);
         h.removeCallbacksAndMessages(null);
     }
-
-    @Override public IBinder onBind(Intent intent) { return null; }
+    @Override public IBinder onBind(Intent i) { return null; }
 }
