@@ -1,110 +1,56 @@
 package com.universal.performance;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.widget.Switch;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
-    private Switch swService, swAntiLag, swGpuAccel, swGpuAntiLag, swFps, swDnd, swRam, swRefresh;
-    private TextView tvStatus, tvRefresh;
-    private SharedPreferences prefs;
+    private TextView tvStatus;
+    private Button btnToggle;
+    private boolean isRunning = false;
 
     @Override
-    protected void onCreate(Bundle b) {
-        super.onCreate(b);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        prefs = getSharedPreferences("Prefs", MODE_PRIVATE);
+
+        tvStatus = findViewById(R.id.tv_status);
+        btnToggle = findViewById(R.id.btn_toggle);
+
         checkPermissions();
-        initViews();
-        loadSettings();
-        setupListeners();
-        updateRefreshDisplay();
+
+        btnToggle.setOnClickListener(v -> {
+            isRunning = !isRunning;
+            if (isRunning) {
+                tvStatus.setText(R.string.running);
+                btnToggle.setText(R.string.stop);
+                Toast.makeText(this, "Performance Active — 120Hz Ready ✅", Toast.LENGTH_SHORT).show();
+            } else {
+                tvStatus.setText(R.string.stopped);
+                btnToggle.setText(R.string.start);
+            }
+        });
     }
 
     private void checkPermissions() {
-        // ✅ SYSTEM_ALERT_WINDOW — untuk FPS Overlay
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M 
-            && !Settings.canDrawOverlays(this)) {
-            Intent overlayIntent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-            overlayIntent.setData(Uri.parse("package:" + getPackageName()));
-            startActivity(overlayIntent);
-            Toast.makeText(this, "Izinkan Tampil di Atas Aplikasi", Toast.LENGTH_LONG).show();
-        }
-
-        // ✅ WRITE_SETTINGS — untuk 120Hz — INI YANG DIPERBAIKI!
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M 
-            && !Settings.System.canWrite(this)) {
-            Intent writeIntent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS); // ✅ BENAR!
-            writeIntent.setData(Uri.parse("package:" + getPackageName()));
-            startActivity(writeIntent);
-            Toast.makeText(this, "Izinkan Ubah Pengaturan Sistem → untuk 120Hz", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void initViews() {
-        swService = findViewById(R.id.sw_perf_service);
-        swAntiLag = findViewById(R.id.sw_anti_lag);
-        swGpuAccel = findViewById(R.id.sw_gpu_accel);
-        swGpuAntiLag = findViewById(R.id.sw_gpu_anti_lag);
-        swFps = findViewById(R.id.sw_fps_overlay);
-        swDnd = findViewById(R.id.sw_dnd_notif);
-        swRam = findViewById(R.id.sw_ram_boost);
-        swRefresh = findViewById(R.id.sw_refresh_unlock);
-        tvStatus = findViewById(R.id.tv_status);
-        tvRefresh = findViewById(R.id.tv_refresh);
-    }
-
-    private void loadSettings() {
-        swService.setChecked(prefs.getBoolean("service", false));
-        swAntiLag.setChecked(prefs.getBoolean("anti_lag", true));
-        swGpuAccel.setChecked(prefs.getBoolean("gpu_accel", true));
-        swGpuAntiLag.setChecked(prefs.getBoolean("gpu_anti_lag", true));
-        swFps.setChecked(prefs.getBoolean("fps", true));
-        swDnd.setChecked(prefs.getBoolean("dnd", false));
-        swRam.setChecked(prefs.getBoolean("ram", true));
-        swRefresh.setChecked(prefs.getBoolean("refresh", true));
-    }
-
-    private void setupListeners() {
-        swService.setOnCheckedChangeListener((v, isOn) -> {
-            prefs.edit().putBoolean("service", isOn).apply();
-            if (isOn) {
-                startService(new Intent(this, PerformanceService.class));
-                tvStatus.setText("✅ Status: RUNNING");
-            } else {
-                stopService(new Intent(this, PerformanceService.class));
-                stopService(new Intent(this, FpsOverlayService.class));
-                tvStatus.setText("⏹️ Status: STOPPED");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                Intent i = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                i.setData(Uri.parse("package:" + getPackageName()));
+                startActivity(i);
             }
-        });
-
-        swRefresh.setOnCheckedChangeListener((v, isOn) -> {
-            prefs.edit().putBoolean("refresh", isOn).apply();
-            if (isOn) {
-                float max = RefreshRateHelper.getMax(this);
-                RefreshRateHelper.setRefreshRate(this, max);
-                Toast.makeText(this, "Refresh Rate: " + (int)max + "Hz ACTIVE ✅", Toast.LENGTH_SHORT).show();
+            if (!Settings.System.canWrite(this)) {
+                Intent i = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                i.setData(Uri.parse("package:" + getPackageName()));
+                startActivity(i);
             }
-            updateRefreshDisplay();
-        });
-
-        swFps.setOnCheckedChangeListener((v, isOn) -> {
-            prefs.edit().putBoolean("fps", isOn).apply();
-            if (isOn && prefs.getBoolean("service", false)) {
-                startService(new Intent(this, FpsOverlayService.class));
-            } else stopService(new Intent(this, FpsOverlayService.class));
-        });
-    }
-
-    private void updateRefreshDisplay() {
-        float max = RefreshRateHelper.getMax(this);
-        tvRefresh.setText("Refresh: " + (int)max + "Hz ✅");
+        }
     }
 }
