@@ -34,12 +34,12 @@ class MainActivity : AppCompatActivity() {
     private val choreographer = android.view.Choreographer.getInstance()
     private var fpsCallback: android.view.Choreographer.FrameCallback? = null
 
-    // ✅ 5 FITUR
+    // ✅ 5 FITUR — SEMUA AKTIF
     private var speedBypassEnabled = true
     private var batterySaverEnabled = true
     private var graphicsEnabled = true
     private var noGmsEnabled = true
-    private var showStatusOverlay = true // 📊 Fitur 5 = Overlay!
+    private var showStatusOverlay = true // 📊 Fitur 5: Show Status Active
 
     private var simulatedCpu = 35.0
     private var simulatedGpu = 40.0
@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         header.addView(title)
         root.addView(header)
 
-        // ✅ FPS/GPU/CPU Monitor di Launcher
+        // ✅ FPS/GPU/CPU MONITOR
         val monitorContainer = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
@@ -203,7 +203,7 @@ class MainActivity : AppCompatActivity() {
         infoCard.addView(infoLayout)
         root.addView(infoCard)
 
-        // ✅ FITUR 5: Show Status Active = Toggle Overlay!
+        // ✅ FITUR 5: Show Status Active
         val feature5Card = CardView(this).apply {
             setCardBackgroundColor(Color.parseColor("#1E1E1E"))
             radius = 20f
@@ -231,7 +231,7 @@ class MainActivity : AppCompatActivity() {
             setPadding(0, 0, 0, 6)
         })
         feature5Text.addView(TextView(this).apply {
-            text = "Overlay FPS/GPU/CPU di atas semua layar • Bisa digeser"
+            text = "Display FPS/GPU/CPU overlay • Quick View"
             textSize = 14f
             setTextColor(Color.parseColor("#AAAAAA"))
             setLineSpacing(4f, 1f)
@@ -243,9 +243,8 @@ class MainActivity : AppCompatActivity() {
                 if (isChecked) checkOverlayPermission() else hideFloatingOverlay()
                 updateStatus()
                 Toast.makeText(this@MainActivity,
-                    if (isChecked) "Cek izin → Lalu Buka Game, angka tetap muncul! 🎮✅"
-                    else "Overlay Disembunyikan ⚠️",
-                    Toast.LENGTH_LONG
+                    if (isChecked) "Show Status → ON ✅" else "Show Status → OFF ⚠️",
+                    Toast.LENGTH_SHORT
                 ).show()
             }
         }
@@ -303,7 +302,7 @@ class MainActivity : AppCompatActivity() {
         startRealTimeMonitoring()
         applyPerformanceFixes()
 
-        // ✅ Auto tampilkan overlay saat buka app
+        // ✅ Auto start overlay
         if (showStatusOverlay) checkOverlayPermission()
     }
 
@@ -315,7 +314,7 @@ class MainActivity : AppCompatActivity() {
         statusValue.text = "$activeCount/5 Features Active ✅"
     }
 
-    // ✅ FPS/GPU/CPU REAL-TIME — UPDATE KE OVERLAY JUGA!
+    // ✅ FPS/GPU/CPU REAL-TIME
     private fun startRealTimeMonitoring() {
         frameCount = 0
         lastFpsTime = System.nanoTime()
@@ -387,7 +386,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ MINTA IZIN TAMPIL DI ATAS APLIKASI LAIN
+    // ✅ PERMISSION OVERLAY
     private fun checkOverlayPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !android.provider.Settings.canDrawOverlays(this)) {
             val intent = Intent(
@@ -395,13 +394,12 @@ class MainActivity : AppCompatActivity() {
                 android.net.Uri.parse("package:$packageName")
             )
             startActivityForResult(intent, REQUEST_OVERLAY_PERMISSION)
-            Toast.makeText(this, "⚠️ Izinkan 'Tampil di atas aplikasi lain' → Lalu kembali ke UGP!", Toast.LENGTH_LONG).show()
         } else {
             showFloatingOverlay()
         }
     }
 
-    // ✅ TAMPILKAN OVERLAY — MUNCUL DI ATAS SEMUA LAYAR!
+    // ✅ SHOW OVERLAY
     private fun showFloatingOverlay() {
         if (overlayView != null) return
 
@@ -414,35 +412,8 @@ class MainActivity : AppCompatActivity() {
                 cornerRadius = 999f
                 setColor(Color.parseColor("#CC000000"))
             }
-            // BISA DIGESER!
-            setOnTouchListener(object : View.OnTouchListener {
-                private var initialX = 0f
-                private var initialY = 0f
-                private var initialTouchX = 0f
-                private var initialTouchY = 0f
-                override fun onTouch(v: View?, event: MotionEvent): Boolean {
-                    val params = v?.layoutParams as WindowManager.LayoutParams
-                    when (event.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            initialX = params.x.toFloat()
-                            initialY = params.y.toFloat()
-                            initialTouchX = event.rawX
-                            initialTouchY = event.rawY
-                            return true
-                        }
-                        MotionEvent.ACTION_MOVE -> {
-                            params.x = (initialX + (event.rawX - initialTouchX)).toInt()
-                            params.y = (initialY + (event.rawY - initialTouchY)).toInt()
-                            windowManager.updateViewLayout(v, params)
-                            return true
-                        }
-                    }
-                    return false
-                }
-            })
         }
 
-        // FPS — HIJAU, KECIL, TEBAL
         layout.addView(TextView(this).apply {
             text = "FPS"
             textSize = 14f
@@ -458,7 +429,6 @@ class MainActivity : AppCompatActivity() {
         }
         layout.addView(overlayFps!!)
 
-        // GPU
         layout.addView(TextView(this).apply {
             text = "GPU"
             textSize = 14f
@@ -474,7 +444,6 @@ class MainActivity : AppCompatActivity() {
         }
         layout.addView(overlayGpu!!)
 
-        // CPU
         layout.addView(TextView(this).apply {
             text = "CPU"
             textSize = 14f
@@ -505,7 +474,6 @@ class MainActivity : AppCompatActivity() {
 
         overlayView = layout
         windowManager.addView(layout, params)
-        Toast.makeText(this, "✅ OVERLAY AKTIF! Buka Game → Angka muncul di atas! 🎮", Toast.LENGTH_LONG).show()
     }
 
     private fun hideFloatingOverlay() {
@@ -615,10 +583,8 @@ class MainActivity : AppCompatActivity() {
             if (android.provider.Settings.canDrawOverlays(this)) {
                 showFloatingOverlay()
                 overlayToggle.isChecked = true
-                Toast.makeText(this, "✅ Izin Diterima! Overlay muncul! Buka Game cek ya! 🎮", Toast.LENGTH_LONG).show()
             } else {
                 overlayToggle.isChecked = false
-                Toast.makeText(this, "❌ Izin ditolak — overlay tidak bisa muncul", Toast.LENGTH_SHORT).show()
             }
         }
     }
