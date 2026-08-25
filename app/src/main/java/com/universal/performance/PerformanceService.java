@@ -39,64 +39,33 @@ public class PerformanceService extends Service {
     }
 
     private Notification buildNotification() {
-        NotificationCompat.Builder nb = new NotificationCompat.Builder(this, CHANNEL_ID)
+        return new NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_media_play)
-            .setContentTitle("⚡ Universal Performance")
-            .setContentText("Anti Lag • Anti Freeze • GPU Opt — Aktif ✅")
+            .setContentTitle("Universal Performance")
+            .setContentText("Anti Lag - Anti Freeze - GPU Opt - Aktif")
             .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setOngoing(true);
-        return nb.build();
+            .setOngoing(true)
+            .build();
     }
 
     private void startOptimizationLoop() {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                applyAntiFreeze();
-                applyCpuOptimization();
-                applyGpuOptimization();
-                applyBatterySaver();
-                handler.postDelayed(this, 2000); // Ulangi tiap 2 detik
+                try {
+                    android.os.Process.setThreadPriority(
+                        android.os.Process.myTid(),
+                        android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY
+                    );
+                } catch (Exception e) { }
+                handler.postDelayed(this, 2000);
             }
         }, 1000);
     }
 
-    // ✅ Anti Freeze — Stabilkan Frame Rate
-    private void applyAntiFreeze() {
-        try {
-            // Set prioritas proses lebih tinggi
-            android.os.Process.setThreadPriority(
-                android.os.Process.myTid(),
-                android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY
-            );
-        } catch (Exception e) { /* ignore */ }
-    }
-
-    // ✅ CPU Optimize — Kurangi Panas
-    private void applyCpuOptimization() {
-        try {
-            // Turunkan beban latar belakang
-            android.os.Process.setThreadPriority(
-                android.os.Process.myPid(),
-                android.os.Process.THREAD_PRIORITY_BACKGROUND + 5
-            );
-        } catch (Exception e) { /* ignore */ }
-    }
-
-    // ✅ GPU Optimize — Tanpa Google Play Services!
-    private void applyGpuOptimization() {
-        // TIDAK PAKAI Google Play Services — lebih ringan!
-        // Hardware acceleration sudah aktif di Manifest
-    }
-
-    // ✅ Hemat Baterai — Kurangi Drain
-    private void applyBatterySaver() {
-        // Minimal update, tidak pakai sensor berlebih
-    }
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        return START_STICKY; // Tetap berjalan meski app ditutup
+        return START_STICKY;
     }
 
     @Override
