@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <item name="overlay_fps" type="id"/>
-    <item name="overlay_gpu" type="id"/>
-    <item name="overlay_cpu" type="id"/>
-</resources>
