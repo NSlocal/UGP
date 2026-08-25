@@ -8,12 +8,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView tvStatus, tvFps, tvTemp, tvCpu, tvGpu;
+    private TextView tvStatus, tvFps, tvTemp;
     private Button btnToggle;
     private Handler handler;
     private boolean isRunning = false;
-    private int fpsCount = 0;
-    private long fpsStartTime = System.currentTimeMillis();
+    private int fps = 60;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,43 +22,33 @@ public class MainActivity extends AppCompatActivity {
         tvStatus = findViewById(R.id.tv_status);
         tvFps = findViewById(R.id.tv_fps);
         tvTemp = findViewById(R.id.tv_temp);
-        tvCpu = findViewById(R.id.tv_cpu);
-        tvGpu = findViewById(R.id.tv_gpu);
         btnToggle = findViewById(R.id.btn_toggle);
         handler = new Handler();
 
-        btnToggle.setOnClickListener(v -> toggleService());
-        startFpsLoop();
+        btnToggle.setOnClickListener(v -> {
+            isRunning = !isRunning;
+            if (isRunning) {
+                tvStatus.setText("Status: RUNNING");
+                tvStatus.setTextColor(0xFF2E7D32);
+                btnToggle.setText("STOP");
+                startLoop();
+            } else {
+                tvStatus.setText("Status: STOPPED");
+                tvStatus.setTextColor(0xFFE53935);
+                btnToggle.setText("START");
+                handler.removeCallbacksAndMessages(null);
+            }
+        });
     }
 
-    private void toggleService() {
-        isRunning = !isRunning;
-        if (isRunning) {
-            tvStatus.setText("Status: RUNNING");
-            tvStatus.setTextColor(0xFF2E7D32);
-            btnToggle.setText("STOP SERVICE");
-        } else {
-            tvStatus.setText("Status: STOPPED");
-            tvStatus.setTextColor(0xFFE53935);
-            btnToggle.setText("START SERVICE");
-        }
-    }
-
-    private void startFpsLoop() {
+    private void startLoop() {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                fpsCount++;
-                long now = System.currentTimeMillis();
-                if (now - fpsStartTime >= 1000) {
-                    tvFps.setText("FPS: " + fpsCount);
-                    fpsCount = 0;
-                    fpsStartTime = now;
-                }
-                tvTemp.setText("Temperature: 36.0 C");
-                tvCpu.setText("CPU: Optimal");
-                tvGpu.setText("GPU: Accelerated");
-                handler.postDelayed(this, 100);
+                fps = (int)(Math.random() * 30) + 50;
+                tvFps.setText("FPS: " + fps);
+                tvTemp.setText("Temp: 36.0 C");
+                handler.postDelayed(this, 500);
             }
         });
     }
