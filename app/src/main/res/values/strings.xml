@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Universal Performance</string>
-    <string name="start">START SERVICE</string>
-    <string name="stop">STOP SERVICE</string>
-    <string name="running">✅ Status: RUNNING</string>
-    <string name="stopped">⏹️ Status: STOPPED</string>
 </resources>
