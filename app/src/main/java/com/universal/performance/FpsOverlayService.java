@@ -57,12 +57,12 @@ public class FpsOverlayService extends Service {
             fps.setText("FPS: " + frameCount);
             frameCount = 0; lastTime = now;
         }
-        temp.setText(String.format("%.1f°C", getTemp()));
-        net.setText("WiFi: " + getWifi());
+        temp.setText(String.format("%.1f°C", getCpuTemp()));
+        net.setText("WiFi: " + getWifiStatus());
         refresh.setText((int)RefreshRateHelper.getCurrent(this) + "Hz");
     }
 
-    private float getTemp() {
+    private float getCpuTemp() {
         try {
             for (String p : new String[]{"/sys/class/thermal/thermal_zone0/temp", "/sys/class/thermal/thermal_zone1/temp"}) {
                 java.io.File f = new java.io.File(p);
@@ -72,10 +72,10 @@ public class FpsOverlayService extends Service {
                 }
             }
         } catch (Exception e) {}
-        return 36;
+        return 36.0f;
     }
 
-    private String getWifi() {
+    private String getWifiStatus() {
         android.net.ConnectivityManager cm = (android.net.ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         android.net.NetworkInfo w = cm.getNetworkInfo(android.net.ConnectivityManager.TYPE_WIFI);
         return w != null && w.isConnected() ? "ON" : "OFF";
