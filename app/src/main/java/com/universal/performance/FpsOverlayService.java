@@ -20,7 +20,8 @@ public class FpsOverlayService extends Service {
     private int frameCount = 0;
     private long lastTime = System.nanoTime();
 
-    @Override public void onCreate() {
+    @Override
+    public void onCreate() {
         super.onCreate();
         h = new Handler();
         createOverlay();
@@ -35,7 +36,7 @@ public class FpsOverlayService extends Service {
         net = view.findViewById(R.id.overlay_network);
         refresh = view.findViewById(R.id.overlay_refresh);
 
-        int type = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? 
+        int type = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ?
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_PHONE;
         WindowManager.LayoutParams p = new WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,
@@ -47,7 +48,12 @@ public class FpsOverlayService extends Service {
     }
 
     private void startCounter() {
-        h.post(new Runnable() { public void run() { updateAll(); h.postDelayed(this, 500); }});
+        h.post(new Runnable() {
+            public void run() {
+                updateAll();
+                h.postDelayed(this, 500);
+            }
+        });
     }
 
     private void updateAll() {
@@ -55,11 +61,12 @@ public class FpsOverlayService extends Service {
         long now = System.nanoTime();
         if ((now - lastTime) / 1e9 >= 1.0) {
             fps.setText("FPS: " + frameCount);
-            frameCount = 0; lastTime = now;
+            frameCount = 0;
+            lastTime = now;
         }
         temp.setText(String.format("%.1f°C", getCpuTemp()));
         net.setText("WiFi: " + getWifiStatus());
-        refresh.setText((int)RefreshRateHelper.getCurrent(this) + "Hz");
+        refresh.setText((int) RefreshRateHelper.getCurrent(this) + "Hz");
     }
 
     private float getCpuTemp() {
@@ -68,7 +75,9 @@ public class FpsOverlayService extends Service {
                 java.io.File f = new java.io.File(p);
                 if (f.exists()) {
                     java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(f));
-                    float t = Float.parseFloat(br.readLine()) / 1000f; br.close(); return t;
+                    float t = Float.parseFloat(br.readLine()) / 1000f;
+                    br.close();
+                    return t;
                 }
             }
         } catch (Exception e) {}
@@ -81,10 +90,15 @@ public class FpsOverlayService extends Service {
         return w != null && w.isConnected() ? "ON" : "OFF";
     }
 
-    @Override public void onDestroy() {
+    @Override
+    public void onDestroy() {
         super.onDestroy();
         if (view != null) wm.removeView(view);
         h.removeCallbacksAndMessages(null);
     }
-    @Override public IBinder onBind(Intent i) { return null; }
+
+    @Override
+    public IBinder onBind(Intent i) {
+        return null;
+    }
 }
