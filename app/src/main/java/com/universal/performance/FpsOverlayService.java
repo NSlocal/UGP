@@ -18,63 +18,76 @@ import android.widget.TextView;
 public class FpsOverlayService extends Service {
     private WindowManager wm;
     private View view;
-    private TextView fps, temp, net, refresh;
+    private TextView fpsTv, tempTv, netTv, refreshTv;
     private Handler h;
     private int frameCount = 0;
-    private long lastTime = System.nanoTime();
+    private long lastSecond = System.nanoTime();
 
-    @Override
-    public void onCreate() {
+    @Override public void onCreate() {
         super.onCreate();
         h = new Handler();
         createOverlay();
-        startCounter();
+        startUpdateLoop();
     }
 
     private void createOverlay() {
         wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         view = LayoutInflater.from(this).inflate(R.layout.overlay_fps, null);
-        fps = view.findViewById(R.id.overlay_fps);
-        temp = view.findViewById(R.id.overlay_temp);
-        net = view.findViewById(R.id.overlay_network);
-        refresh = view.findViewById(R.id.overlay_refresh);
+        fpsTv = view.findViewById(R.id.overlay_fps);
+        tempTv = view.findViewById(R.id.overlay_temp);
+        netTv = view.findViewById(R.id.overlay_network);
+        refreshTv = view.findViewById(R.id.overlay_refresh);
 
         int type = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ?
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_PHONE;
+        
         WindowManager.LayoutParams p = new WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,
-            type, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            type,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
             PixelFormat.TRANSLUCENT);
         p.gravity = Gravity.TOP | Gravity.START;
-        p.x = 20; p.y = 50;
+        p.x = 16; p.y = 40;
         wm.addView(view, p);
     }
 
-    private void startCounter() {
+    private void startUpdateLoop() {
         h.post(new Runnable() {
-            public void run() {
-                updateAll();
+            @Override public void run() {
+                updateAllValues();
                 h.postDelayed(this, 500);
             }
         });
     }
 
-    private void updateAll() {
+    private void updateAllValues() {
+        // FPS Calculate
         frameCount++;
         long now = System.nanoTime();
-        if ((now - lastTime) / 1e9 >= 1.0) {
-            fps.setText("FPS: " + frameCount);
+        if ((now - lastSecond) / 1_000_000_000L >= 1) {
+            fpsTv.setText("FPS: " + frameCount);
             frameCount = 0;
-            lastTime = now;
+            lastSecond = now;
         }
-        temp.setText(String.format("%.1f°C", getCpuTemp()));
-        net.setText("WiFi: " + getWifiStatus());
-        refresh.setText((int) RefreshRateHelper.getCurrent(this) + "Hz");
+
+        // Temperature
+        tempTv.setText(String.format("%.1f°C", getCpuTemp()));
+
+        // Network Status
+        netTv.setText("WiFi: " + getWifiStatus());
+
+        // Refresh Rate
+        refreshTv.setText((int) RefreshRateHelper.getCurrent(this) + "Hz");
     }
 
     private float getCpuTemp() {
         try {
-            for (String p : new String[]{"/sys/class/thermal/thermal_zone0/temp", "/sys/class/thermal/thermal_zone1/temp"}) {
+            String[] paths = {
+                "/sys/class/thermal/thermal_zone0/temp",
+                "/sys/class/thermal/thermal_zone1/temp"
+            };
+            for (String p : paths) {
                 java.io.File f = new java.io.File(p);
                 if (f.exists()) {
                     java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(f));
@@ -94,18 +107,14 @@ public class FpsOverlayService extends Service {
             NetworkCapabilities c = cm.getNetworkCapabilities(n);
             return c != null && c.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ? "ON" : "OFF";
         }
-        return cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnected() ? "ON" : "OFF";
+        return "ON";
     }
 
-    @Override
-    public void onDestroy() {
+    @Override public void onDestroy() {
         super.onDestroy();
         if (view != null) wm.removeView(view);
         h.removeCallbacksAndMessages(null);
     }
 
-    @Override
-    public IBinder onBind(Intent i) {
-        return null;
-    }
+    @Override public IBinder onBind(Intent intent) { return null; }
 }
