@@ -8,6 +8,7 @@
 
 # === KEEP APP ENTRY ===
 -keep class com.universal.performance.** { *; }
+-dontwarn com.universal.performance.**
 -keep interface com.universal.performance.** { *; }
 
 # === ANDROID COMPONENTS — Prevent crash on launch ===
