@@ -2,7 +2,10 @@ package com.universal.performance;
 
 import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -85,9 +88,13 @@ public class FpsOverlayService extends Service {
     }
 
     private String getWifiStatus() {
-        android.net.ConnectivityManager cm = (android.net.ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        android.net.NetworkInfo w = cm.getNetworkInfo(android.net.ConnectivityManager.TYPE_WIFI);
-        return w != null && w.isConnected() ? "ON" : "OFF";
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            android.net.Network n = cm.getActiveNetwork();
+            NetworkCapabilities c = cm.getNetworkCapabilities(n);
+            return c != null && c.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ? "ON" : "OFF";
+        }
+        return cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnected() ? "ON" : "OFF";
     }
 
     @Override
