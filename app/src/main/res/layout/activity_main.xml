@@ -10,18 +10,16 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- JUDUL -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="⚡ Universal Performance"
+            android:text="Universal Performance"
             android:textSize="26sp"
             android:textStyle="bold"
             android:gravity="center"
             android:textColor="#1A73E8"
             android:layout_marginBottom="20dp"/>
 
-        <!-- STATUS CARD -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -34,7 +32,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="📊 Status Sistem"
+                android:text="Status Sistem"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="#333333"
@@ -44,7 +42,7 @@
                 android:id="@+id/tv_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="⏹️ Service: STOPPED"
+                android:text="Service: STOPPED"
                 android:textSize="16sp"
                 android:textColor="#E53935"
                 android:layout_marginBottom="8dp"/>
@@ -53,7 +51,7 @@
                 android:id="@+id/tv_fps"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🎮 FPS: 60"
+                android:text="FPS: 60"
                 android:textSize="15sp"
                 android:textColor="#2E7D32"
                 android:layout_marginBottom="4dp"/>
@@ -62,7 +60,7 @@
                 android:id="@+id/tv_temp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🌡️ Suhu: 36.0°C"
+                android:text="Temperature: 36.0 C"
                 android:textSize="15sp"
                 android:textColor="#E65100"
                 android:layout_marginBottom="4dp"/>
@@ -71,7 +69,7 @@
                 android:id="@+id/tv_cpu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="💻 CPU: Optimal"
+                android:text="CPU: Optimal"
                 android:textSize="15sp"
                 android:textColor="#1565C0"
                 android:layout_marginBottom="4dp"/>
@@ -80,12 +78,11 @@
                 android:id="@+id/tv_gpu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🎨 GPU: Accelerated"
+                android:text="GPU: Accelerated"
                 android:textSize="15sp"
                 android:textColor="#7B1FA2"/>
         </LinearLayout>
 
-        <!-- KONTROL FITUR -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -98,7 +95,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🎛️ Kontrol Fitur"
+                android:text="Kontrol Fitur"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="#333333"
@@ -108,7 +105,7 @@
                 android:id="@+id/sw_service"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="🚀 Performance Service"
+                android:text="Performance Service"
                 android:textSize="15sp"
                 android:paddingVertical="10dp"/>
 
@@ -116,7 +113,7 @@
                 android:id="@+id/sw_anti_freeze"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="❄️ Anti Freeze & Frame Stabilizer"
+                android:text="Anti Freeze & Frame Stabilizer"
                 android:textSize="15sp"
                 android:paddingVertical="10dp"/>
 
@@ -124,7 +121,7 @@
                 android:id="@+id/sw_cpu_opt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="💻 CPU Optimize (Anti Panas)"
+                android:text="CPU Optimize (Anti Panas)"
                 android:textSize="15sp"
                 android:paddingVertical="10dp"/>
 
@@ -132,7 +129,7 @@
                 android:id="@+id/sw_gpu_opt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="🎨 GPU Optimize & Acceleration"
+                android:text="GPU Optimize & Acceleration"
                 android:textSize="15sp"
                 android:paddingVertical="10dp"/>
 
@@ -140,17 +137,16 @@
                 android:id="@+id/sw_battery_save"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="🔋 Hemat Baterai (Tanpa GMS)"
+                android:text="Hemat Baterai (Tanpa GMS)"
                 android:textSize="15sp"
                 android:paddingVertical="10dp"/>
         </LinearLayout>
 
-        <!-- TOMBOL UTAMA -->
         <Button
             android:id="@+id/btn_toggle"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="▶️ START SERVICE"
+            android:text="START SERVICE"
             android:textSize="18sp"
             android:textStyle="bold"
             android:backgroundTint="#1A73E8"
@@ -160,7 +156,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="⚠️ Tanpa Google Play Services — Lebih Ringan & Cepat!"
+            android:text="Tanpa Google Play Services — Lebih Ringan & Cepat!"
             android:textSize="13sp"
             android:gravity="center"
             android:textColor="#666666"
