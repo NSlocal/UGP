@@ -32,7 +32,6 @@ public class RefreshRateHelper {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (Settings.System.canWrite(ctx)) {
-                    // Non-root refresh rate optimization
                     return true;
                 }
             }
