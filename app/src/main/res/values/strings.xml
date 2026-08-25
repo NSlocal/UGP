@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Universal Performance</string>
-    <string name="performance_service">Performance Service</string>
-    <string name="anti_lag">Anti Lag Mode</string>
-    <string name="gpu_accel">GPU Acceleration</string>
-    <string name="gpu_anti_lag">GPU Anti Lag</string>
-    <string name="dnd_mode">DND &amp; Notif Killer</string>
-    <string name="ram_boost">RAM Background Anti Lag</string>
-    <string name="fps_overlay">FPS Real-time Overlay</string>
-    <string name="refresh_rate_unlock">Refresh Rate Unlock</string>
+    <string name="performance_service">1. Performance Service</string>
+    <string name="anti_lag">2. Anti Lag Mode</string>
+    <string name="gpu_accel">3. GPU Acceleration</string>
+    <string name="gpu_anti_lag">4. GPU Anti Lag</string>
+    <string name="fps_overlay">5. FPS &amp; Network Real-time</string>
+    <string name="dnd_mode">6. DND &amp; Notif Killer</string>
+    <string name="ram_boost">7. RAM Background Anti Lag</string>
+    <string name="refresh_unlock">8. Refresh Rate Unlock (90-120Hz)</string>
     <string name="status_running">Status: Running</string>
     <string name="status_stopped">Status: Stopped</string>
+    <string name="game_support">Supported: QQ Speed, Speed Drifters</string>
 </resources>
