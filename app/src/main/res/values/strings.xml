@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Universal Performance</string>
-    <string name="status_running">✅ Status: RUNNING</string>
-    <string name="status_stopped">⏹️ Status: STOPPED</string>
-    <string name="request_permission">Izinkan Pengaturan Sistem untuk 120Hz</string>
+    <string name="start">Start Service</string>
+    <string name="stop">Stop Service</string>
+    <string name="running">✅ Status: RUNNING</string>
+    <string name="stopped">⏹️ Status: STOPPED</string>
 </resources>
