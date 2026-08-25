@@ -53,8 +53,8 @@ public class PerformanceService extends Service {
     }
 
     private Notification buildNotif() {
-        String monitoring = currentPkg.isEmpty() ? "Waiting for game…" : GameConfig.getGameInfo(currentPkg) != null 
-            ? "🎮 " + GameConfig.getGameInfo(currentPkg).name : currentPkg;
+        String monitoring = currentPkg.isEmpty() ? "Waiting for game…" : 
+            GameConfig.isSupportedGame(currentPkg) ? "🎮 " + GameConfig.getGameInfo(currentPkg).name : currentPkg;
         return new Notification.Builder(this, CHANNEL)
             .setContentTitle("Universal Performance — ACTIVE")
             .setContentText(monitoring)
@@ -101,9 +101,7 @@ public class PerformanceService extends Service {
                 nm.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
             }
         }
-        if (refreshUnlock) {
-            RefreshRateHelper.setRefreshRate(this, 120);
-        }
+        if (refreshUnlock) RefreshRateHelper.setRefreshRate(this, 120);
         Log.d(TAG, "✅ ALL OPTIMIZATIONS APPLIED");
     }
 
