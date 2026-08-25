@@ -9,9 +9,9 @@
     <string name="speed_desc">Unlock frame rate • 120Hz smooth • Anti-freeze</string>
     <string name="lag_title">Anti-Lag Freeze</string>
     <string name="lag_desc">Stabilize CPU/GPU • Reduce jitter • No frame drop</string>
-    <string name="battery_title">Battery Saver  Cooler</string>
+    <string name="battery_title">Battery Saver Cooler</string>
     <string name="battery_desc">Optimize power • Reduce heat • No overheating</string>
-    <string name="graphics_title">Graphics & Stability</string>
+    <string name="graphics_title">Graphics Stability</string>
     <string name="graphics_desc">Max FPS • Smooth render • Gameplay stable</string>
     <string name="gms_title">No Google Services</string>
     <string name="gms_desc">Disable GMS • Remove lag source • Lighter runtime</string>
