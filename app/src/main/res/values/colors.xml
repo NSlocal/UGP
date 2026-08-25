@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Primary Brand -->
     <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC6</color>
-    <color name="white">#FFFFFF</color>
+
+    <!-- Feature Colors -->
+    <color name="speed">#6200EE</color>
+    <color name="antiLag">#03DAC6</color>
+    <color name="battery">#FF9800</color>
+    <color name="graphics">#4CAF50</color>
+    <color name="gms">#F44336</color>
+
+    <!-- UI Background -->
+    <color name="bgDark">#121212</color>
+    <color name="cardBg">#1E1E1E</color>
+    <color name="divider">#333333</color>
+
+    <!-- Text Colors -->
+    <color name="textWhite">#FFFFFF</color>
+    <color name="textSecondary">#BBBBBB</color>
+    <color name="textMuted">#AAAAAA</color>
+    <color name="textHint">#888888</color>
+
+    <!-- Status -->
+    <color name="statusGood">#4CAF50</color>
+    <color name="statusWarning">#FF9800</color>
+    <color name="statusBad">#F44336</color>
 </resources>
