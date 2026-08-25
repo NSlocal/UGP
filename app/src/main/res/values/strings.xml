@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Universal Performance</string>
-    <string name="notification_title">Universal Performance</string>
-    <string name="notification_text">Service Running — Game Optimization Active</string>
+    <string name="status_running">✅ Status: RUNNING</string>
+    <string name="status_stopped">⏹️ Status: STOPPED</string>
+    <string name="request_permission">Izinkan Pengaturan Sistem untuk 120Hz</string>
 </resources>
