@@ -2,6 +2,8 @@ package com.universal.performance;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -42,12 +44,11 @@ public class MainActivity extends AppCompatActivity {
         sDnd = findViewById(R.id.switch_dnd_mode);
         sRam = findViewById(R.id.switch_ram_boost);
         sRefresh = findViewById(R.id.switch_refresh);
-        
         tStatus = findViewById(R.id.text_status);
         tFps = findViewById(R.id.text_fps);
         tTemp = findViewById(R.id.text_temp);
         tNet = findViewById(R.id.text_network);
-        tRefresh = findViewById(R.id.text_refresh);
+        tRefresh = findViewById(R.id.text_refresh_rate);
         tGames = findViewById(R.id.text_games);
     }
 
@@ -76,23 +77,23 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        sAntiLag.setOnCheckedChangeListener((v, i) -> { 
-            prefs.edit().putBoolean("anti_lag", i).apply(); sendUpdate(); 
+        sAntiLag.setOnCheckedChangeListener((v, i) -> {
+            prefs.edit().putBoolean("anti_lag", i).apply(); sendUpdate();
         });
-        sGpuAccel.setOnCheckedChangeListener((v, i) -> { 
-            prefs.edit().putBoolean("gpu_accel", i).apply(); sendUpdate(); 
+        sGpuAccel.setOnCheckedChangeListener((v, i) -> {
+            prefs.edit().putBoolean("gpu_accel", i).apply(); sendUpdate();
         });
-        sGpuAntiLag.setOnCheckedChangeListener((v, i) -> { 
-            prefs.edit().putBoolean("gpu_anti_lag", i).apply(); sendUpdate(); 
+        sGpuAntiLag.setOnCheckedChangeListener((v, i) -> {
+            prefs.edit().putBoolean("gpu_anti_lag", i).apply(); sendUpdate();
         });
-        sDnd.setOnCheckedChangeListener((v, i) -> { 
-            prefs.edit().putBoolean("dnd_mode", i).apply(); sendUpdate(); 
+        sDnd.setOnCheckedChangeListener((v, i) -> {
+            prefs.edit().putBoolean("dnd_mode", i).apply(); sendUpdate();
         });
-        sRam.setOnCheckedChangeListener((v, i) -> { 
-            prefs.edit().putBoolean("ram_boost", i).apply(); sendUpdate(); 
+        sRam.setOnCheckedChangeListener((v, i) -> {
+            prefs.edit().putBoolean("ram_boost", i).apply(); sendUpdate();
         });
-        sRefresh.setOnCheckedChangeListener((v, i) -> { 
-            prefs.edit().putBoolean("refresh_unlock", i).apply(); sendUpdate(); 
+        sRefresh.setOnCheckedChangeListener((v, i) -> {
+            prefs.edit().putBoolean("refresh_unlock", i).apply(); sendUpdate();
         });
         sFps.setOnCheckedChangeListener((v, isChecked) -> {
             if (isChecked && prefs.getBoolean("service_running", false)) {
@@ -119,5 +120,26 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateUI() {
         tRefresh.setText("Refresh Rate: " + (int)RefreshRateHelper.getCurrent(this) + "Hz");
+        tNet.setText("WiFi: " + isWifiConnected() + " | Data: " + isDataConnected());
+    }
+
+    private String isWifiConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            android.net.Network n = cm.getActiveNetwork();
+            NetworkCapabilities c = cm.getNetworkCapabilities(n);
+            return c != null && c.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ? "ON" : "OFF";
+        }
+        return cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnected() ? "ON" : "OFF";
+    }
+
+    private String isDataConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            android.net.Network n = cm.getActiveNetwork();
+            NetworkCapabilities c = cm.getNetworkCapabilities(n);
+            return c != null && c.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ? "ON" : "OFF";
+        }
+        return cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).isConnected() ? "ON" : "OFF";
     }
 }
