@@ -1,10 +1,10 @@
 package com.universal.performance
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.*
 import android.view.Gravity
 import android.view.View
@@ -65,7 +65,6 @@ class MainActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
             )
-            // Padding untuk menghindari notch/cutout
             setPadding(0, getStatusBarHeight(), 0, 0)
         }
 
@@ -86,37 +85,114 @@ class MainActivity : AppCompatActivity() {
         header.addView(title)
         root.addView(header)
 
-        // === REAL-TIME MONITOR PANEL — FPS + GPU + CPU + TEMP + BATTERY ===
-        val monitorCard = CardView(this).apply {
+        // ✅ FPS GPU CPU MONITOR — PERSIS SEPERTI GAMBAR REFERENSI!
+        val monitorContainer = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(24, 24, 24, 8)
+        }
+        val monitorBg = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(48, 20, 48, 20)
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 999f // ✅ Lengkung pill-shaped seperti gambar
+                setColor(Color.parseColor("#DD000000")) // Hitam transparan
+            }
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        // FPS
+        val fpsLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 32, 0)
+        }
+        fpsLayout.addView(TextView(this).apply {
+            text = "FPS"
+            textSize = 20f
+            setTextColor(Color.WHITE)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        })
+        fpsValue = TextView(this).apply {
+            text = "--"
+            textSize = 20f
+            setTextColor(Color.parseColor("#4CAF50"))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(8, 0, 0, 0)
+        }
+        fpsLayout.addView(fpsValue)
+        monitorBg.addView(fpsLayout)
+
+        // GPU
+        val gpuLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 32, 0)
+        }
+        gpuLayout.addView(TextView(this).apply {
+            text = "GPU"
+            textSize = 20f
+            setTextColor(Color.WHITE)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        })
+        gpuValue = TextView(this).apply {
+            text = "--%"
+            textSize = 20f
+            setTextColor(Color.parseColor("#4CAF50"))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(8, 0, 0, 0)
+        }
+        gpuLayout.addView(gpuValue)
+        monitorBg.addView(gpuLayout)
+
+        // CPU
+        val cpuLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+        }
+        cpuLayout.addView(TextView(this).apply {
+            text = "CPU"
+            textSize = 20f
+            setTextColor(Color.WHITE)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        })
+        cpuValue = TextView(this).apply {
+            text = "--%"
+            textSize = 20f
+            setTextColor(Color.parseColor("#4CAF50"))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(8, 0, 0, 0)
+        }
+        cpuLayout.addView(cpuValue)
+        monitorBg.addView(cpuLayout)
+
+        monitorContainer.addView(monitorBg)
+        root.addView(monitorContainer)
+
+        // === TEMPERATURE + BATTERY + STATUS ===
+        val infoCard = CardView(this).apply {
             setCardBackgroundColor(Color.parseColor("#1E1E1E"))
-            radius = 24f
-            cardElevation = 8f
-            setContentPadding(32, 28, 32, 28)
+            radius = 16f
+            cardElevation = 4f
+            setContentPadding(32, 24, 32, 24)
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { setMargins(24, 24, 24, 16) }
+            ).apply { setMargins(24, 8, 24, 16) }
         }
-        val monitorLayout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val infoLayout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
 
-        // FPS + GPU + CPU — BARIS UTAMA SEPERTI CONTOH GAMBAR
-        val topStatsRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
-            setPadding(0, 0, 0, 16)
-        }
-        fpsValue = createStatLabel(topStatsRow, "FPS", "--", "#4CAF50")
-        gpuValue = createStatLabel(topStatsRow, "GPU", "--%", "#03DAC6")
-        cpuValue = createStatLabel(topStatsRow, "CPU", "--%", "#FF9800")
-        monitorLayout.addView(topStatsRow)
+        tempValue = createInfoRow(infoLayout, "Temperature", "--°C", "#FF9800")
+        batteryValue = createInfoRow(infoLayout, "Battery", "--%", "#03DAC6")
+        statusValue = createInfoRow(infoLayout, "Status", "All Systems Active ✅", "#6200EE")
 
-        // Temperature + Battery
-        tempValue = createStatRow(monitorLayout, "Temperature", "--°C", "#FF9800")
-        batteryValue = createStatRow(monitorLayout, "Battery", "--%", "#03DAC6")
-        statusValue = createStatRow(monitorLayout, "Status", "All Systems Active ✅", "#6200EE")
-
-        monitorCard.addView(monitorLayout)
-        root.addView(monitorCard)
+        infoCard.addView(infoLayout)
+        root.addView(infoCard)
 
         // === FEATURE TOGGLES — ON/OFF SWITCH ===
         val scroll = ScrollView(this).apply {
@@ -169,38 +245,12 @@ class MainActivity : AppCompatActivity() {
         applyPerformanceFixes()
     }
 
-    // === BUILD STAT LABEL FOR TOP ROW (FPS / GPU / CPU) ===
-    private fun createStatLabel(parent: LinearLayout, label: String, value: String, color: String): TextView {
-        val container = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-        }
-        val labelTv = TextView(this).apply {
-            text = label
-            textSize = 14f
-            setTextColor(Color.parseColor("#888888"))
-            gravity = Gravity.CENTER
-        }
-        val valueTv = TextView(this).apply {
-            text = value
-            textSize = 20f
-            setTextColor(Color.parseColor(color))
-            setTypeface(null, android.graphics.Typeface.BOLD)
-            gravity = Gravity.CENTER
-        }
-        container.addView(labelTv)
-        container.addView(valueTv)
-        parent.addView(container)
-        return valueTv
-    }
-
-    // === CREATE STAT ROW ===
-    private fun createStatRow(parent: LinearLayout, label: String, value: String, color: String): TextView {
+    // === CREATE INFO ROW ===
+    private fun createInfoRow(parent: LinearLayout, label: String, value: String, color: String): TextView {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, 8, 0, 8)
+            setPadding(0, 10, 0, 10)
         }
         val labelTv = TextView(this).apply {
             text = label
@@ -213,7 +263,6 @@ class MainActivity : AppCompatActivity() {
             textSize = 16f
             setTextColor(Color.parseColor(color))
             setTypeface(null, android.graphics.Typeface.BOLD)
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         }
         row.addView(labelTv)
         row.addView(valueTv)
@@ -225,7 +274,7 @@ class MainActivity : AppCompatActivity() {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 1
-            ).apply { setMargins(0, 12, 0, 12) }
+            ).apply { setMargins(0, 8, 0, 8) }
         })
         return valueTv
     }
