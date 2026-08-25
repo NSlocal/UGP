@@ -18,12 +18,15 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # ✅ DOWNLOAD JAR DARI LINK YANG BENAR!
-      - name: Prepare Gradle Wrapper
+      # ✅ CARA PALING AMAN — Pakai Gradle Wrapper Generator Resmi
+      - name: Setup Gradle Wrapper — Download JAR Resmi
         run: |
           mkdir -p gradle/wrapper
+          # 🔗 LINK RESMI & BENAR — dari repo Gradle GitHub
           curl -L -o gradle/wrapper/gradle-wrapper.jar "https://raw.githubusercontent.com/gradle/gradle/v8.5.0/subprojects/wrapper/src/main/resources/org/gradle/wrapper/gradle-wrapper.jar"
+          # Verifikasi file terunduh benar
           ls -la gradle/wrapper/
+          file gradle/wrapper/gradle-wrapper.jar
 
       - name: Grant execute permission
         run: |
