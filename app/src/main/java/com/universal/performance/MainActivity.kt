@@ -38,26 +38,22 @@ class MainActivity : AppCompatActivity() {
     private var batterySaverEnabled = true
     private var graphicsEnabled = true
     private var noGmsEnabled = true
-    private var showStatusOverlay = true // ✅ Fitur 5: Show Status Active
+    private var showStatusOverlay = true
 
     private var simulatedCpu = 35.0
     private var simulatedGpu = 40.0
     private val random = java.util.Random()
 
-    // ✅ Target Game Package Names
-    private val targetPackages = listOf(
-        "com.tencent.tmgp.speedmobile",    // QQ飞车
-        "com.garena.game.fctw"              // Speed Drifters
-    )
+    private var overlayFps: TextView? = null
+    private var overlayGpu: TextView? = null
+    private var overlayCpu: TextView? = null
+    private var overlayView: View? = null
+    private val windowManager by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
 
     companion object {
         private const val REQUEST_NOTIFICATION_PERMISSION = 1001
         private const val REQUEST_OVERLAY_PERMISSION = 1002
     }
-
-    // === FLOATING OVERLAY ===
-    private var overlayView: View? = null
-    private val windowManager by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,7 +98,6 @@ class MainActivity : AppCompatActivity() {
         header.addView(title)
         root.addView(header)
 
-        // ✅ FPS GPU CPU MONITOR
         val monitorContainer = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
@@ -188,7 +183,6 @@ class MainActivity : AppCompatActivity() {
         monitorContainer.addView(monitorBg)
         root.addView(monitorContainer)
 
-        // ✅ Info Panel
         val infoCard = CardView(this).apply {
             setCardBackgroundColor(Color.parseColor("#1E1E1E"))
             radius = 16f
@@ -206,7 +200,6 @@ class MainActivity : AppCompatActivity() {
         infoCard.addView(infoLayout)
         root.addView(infoCard)
 
-        // ✅ Fitur 5: Show Status Active — Toggle Overlay In-Game!
         val overlayCard = CardView(this).apply {
             setCardBackgroundColor(Color.parseColor("#1E1E1E"))
             radius = 20f
@@ -234,7 +227,7 @@ class MainActivity : AppCompatActivity() {
             setPadding(0, 0, 0, 6)
         })
         overlayText.addView(TextView(this).apply {
-            text = "Display FPS/GPU/CPU overlay in QQ Speed & Speed Drifters"
+            text = "Display FPS/GPU/CPU in QQ Speed & Speed Drifters"
             textSize = 14f
             setTextColor(Color.parseColor("#AAAAAA"))
             setLineSpacing(4f, 1f)
@@ -243,11 +236,11 @@ class MainActivity : AppCompatActivity() {
             isChecked = showStatusOverlay
             setOnCheckedChangeListener { _, isChecked ->
                 showStatusOverlay = isChecked
-                if (isChecked) showFloatingOverlay() else hideFloatingOverlay()
+                if (isChecked) checkOverlayPermission() else hideFloatingOverlay()
                 updateStatus()
                 Toast.makeText(this@MainActivity,
-                    if (isChecked) "Overlay Active ✅ — Buka Game Lihat Atas Layar!" else "Overlay Hidden ⚠️",
-                    Toast.LENGTH_LONG
+                    if (isChecked) "Overlay Active ✅" else "Overlay Hidden ⚠️",
+                    Toast.LENGTH_SHORT
                 ).show()
             }
         }
@@ -256,7 +249,6 @@ class MainActivity : AppCompatActivity() {
         overlayCard.addView(overlayContent)
         root.addView(overlayCard)
 
-        // ✅ Feature Toggles 1-4
         val scroll = ScrollView(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -305,11 +297,9 @@ class MainActivity : AppCompatActivity() {
         startRealTimeMonitoring()
         applyPerformanceFixes()
 
-        // ✅ Auto Show Overlay jika diaktifkan
         if (showStatusOverlay) checkOverlayPermission()
     }
 
-    // ✅ UPDATE STATUS — 5 FITUR SEKARANG!
     private fun updateStatus() {
         val activeCount = listOf(
             speedBypassEnabled, batterySaverEnabled, graphicsEnabled, noGmsEnabled, showStatusOverlay
@@ -317,7 +307,6 @@ class MainActivity : AppCompatActivity() {
         statusValue.text = "$activeCount/5 Features Active ✅"
     }
 
-    // ✅ FPS + GPU + CPU REAL-TIME
     private fun startRealTimeMonitoring() {
         frameCount = 0
         lastFpsTime = System.nanoTime()
@@ -330,8 +319,7 @@ class MainActivity : AppCompatActivity() {
                     val fps = (frameCount * 1_000_000_000L / elapsed.toDouble()).roundToInt()
                     val capped = fps.coerceAtMost(120)
                     fpsValue.text = capped.toString()
-                    // Update overlay juga
-                    overlayView?.findViewById<TextView>(R.id.overlay_fps)?.text = capped.toString()
+                    overlayFps?.text = capped.toString()
                     frameCount = 0
                     lastFpsTime = frameTimeNanos
                 }
@@ -360,9 +348,8 @@ class MainActivity : AppCompatActivity() {
         val gpuInt = simulatedGpu.roundToInt()
         cpuValue.text = "$cpuInt%"
         gpuValue.text = "$gpuInt%"
-        // Update overlay
-        overlayView?.findViewById<TextView>(R.id.overlay_cpu)?.text = "$cpuInt%"
-        overlayView?.findViewById<TextView>(R.id.overlay_gpu)?.text = "$gpuInt%"
+        overlayCpu?.text = "$cpuInt%"
+        overlayGpu?.text = "$gpuInt%"
     }
 
     private fun updateTemperature() {
@@ -391,7 +378,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ FLOATING OVERLAY — KECIL, TRANSPARAN, ANGKA HIJAU PERSIS GAMBAR!
     private fun checkOverlayPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !android.provider.Settings.canDrawOverlays(this)) {
             val intent = Intent(
@@ -407,7 +393,6 @@ class MainActivity : AppCompatActivity() {
     private fun showFloatingOverlay() {
         if (overlayView != null) return
 
-        // ✅ Overlay UI — KECIL, TRANSPARAN, HIJAU!
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
@@ -415,7 +400,7 @@ class MainActivity : AppCompatActivity() {
             background = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
                 cornerRadius = 999f
-                setColor(Color.parseColor("#AA000000")) // Transparan
+                setColor(Color.parseColor("#AA000000"))
             }
             setOnTouchListener(object : View.OnTouchListener {
                 private var initialX = 0f
@@ -444,52 +429,49 @@ class MainActivity : AppCompatActivity() {
             })
         }
 
-        // FPS — HIJAU, KECIL, TEBAL
         layout.addView(TextView(this).apply {
             text = "FPS"
             textSize = 14f
             setTextColor(Color.WHITE)
             setPadding(0, 0, 4, 0)
         })
-        layout.addView(TextView(this).apply {
-            id = R.id.overlay_fps
+        overlayFps = TextView(this).apply {
             text = "60"
             textSize = 14f
             setTextColor(Color.parseColor("#4CAF50"))
             setTypeface(null, android.graphics.Typeface.BOLD)
             setPadding(0, 0, 16, 0)
-        })
+        }
+        layout.addView(overlayFps!!)
 
-        // GPU
         layout.addView(TextView(this).apply {
             text = "GPU"
             textSize = 14f
             setTextColor(Color.WHITE)
             setPadding(0, 0, 4, 0)
         })
-        layout.addView(TextView(this).apply {
-            id = R.id.overlay_gpu
+        overlayGpu = TextView(this).apply {
             text = "24%"
             textSize = 14f
             setTextColor(Color.parseColor("#4CAF50"))
             setTypeface(null, android.graphics.Typeface.BOLD)
             setPadding(0, 0, 16, 0)
-        })
+        }
+        layout.addView(overlayGpu!!)
 
-        // CPU
         layout.addView(TextView(this).apply {
             text = "CPU"
             textSize = 14f
             setTextColor(Color.WHITE)
             setPadding(0, 0, 4, 0)
         })
-        layout.addView(TextView(this).apply {
-            id = R.id.overlay_cpu
+        overlayCpu = TextView(this).apply {
             text = "68%"
             textSize = 14f
             setTextColor(Color.parseColor("#4CAF50"))
             setTypeface(null, android.graphics.Typeface.BOLD)
-        })
+        }
+        layout.addView(overlayCpu!!)
 
         val params = WindowManager.LayoutParams(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -512,9 +494,11 @@ class MainActivity : AppCompatActivity() {
     private fun hideFloatingOverlay() {
         overlayView?.let { windowManager.removeView(it) }
         overlayView = null
+        overlayFps = null
+        overlayGpu = null
+        overlayCpu = null
     }
 
-    // === UTILITY ===
     private fun createInfoRow(parent: LinearLayout, label: String, value: String, color: String): TextView {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
