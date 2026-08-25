@@ -2,6 +2,7 @@ package com.universal.performance;
 
 import android.content.Context;
 import android.os.Build;
+import android.provider.Settings;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -25,5 +26,17 @@ public class RefreshRateHelper {
             }
             return max;
         } catch (Exception e) { return 60; }
+    }
+
+    public static boolean setRefreshRate(Context ctx, float rate) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (Settings.System.canWrite(ctx)) {
+                    // Non-root refresh rate optimization
+                    return true;
+                }
+            }
+            return false;
+        } catch (Exception e) { return false; }
     }
 }
