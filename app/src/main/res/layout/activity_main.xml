@@ -4,109 +4,53 @@
     android:layout_height="match_parent"
     android:background="#F5F5F5"
     android:padding="16dp">
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <LinearLayout android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Header -->
-        <TextView
-            android:layout_width="match_parent"
+        <TextView android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Universal Performance"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:layout_marginBottom="8dp"
-            android:textColor="#1A1A1A"/>
+            android:textSize="28sp" android:textStyle="bold"
+            android:gravity="center" android:layout_marginBottom="8dp"/>
 
-        <TextView
-            android:id="@+id/tv_status"
+        <TextView android:id="@+id/tv_status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Status: Stopped"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:layout_marginBottom="24dp"
+            android:text="Status: Stopped" android:textSize="16sp"
+            android:gravity="center" android:layout_marginBottom="24dp"
             android:textColor="#666666"/>
 
-        <!-- 🎛️ CONTROL PANEL — FITUR 1-8 -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <LinearLayout android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="#FFFFFF"
-            android:padding="16dp"
-            android:layout_marginBottom="12dp"
+            android:orientation="vertical" android:background="#FFFFFF"
+            android:padding="16dp" android:layout_marginBottom="12dp"
             android:elevation="2dp">
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="🎛️ Control Panel"
+                android:textSize="18sp" android:textStyle="bold" android:layout_marginBottom="16dp"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🎛️ Control Panel"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="16dp"/>
-
-            <Switch android:id="@+id/sw_perf_service"   android:text="1. Performance Service"       android:layout_width="match_parent" android:paddingVertical="8dp"/>
-            <Switch android:id="@+id/sw_anti_lag"       android:text="2. Anti Lag Mode"             android:layout_width="match_parent" android:paddingVertical="8dp"/>
-            <Switch android:id="@+id/sw_gpu_accel"      android:text="3. GPU Acceleration"          android:layout_width="match_parent" android:paddingVertical="8dp"/>
-            <Switch android:id="@+id/sw_gpu_anti_lag"   android:text="4. GPU Anti Lag"              android:layout_width="match_parent" android:paddingVertical="8dp"/>
-            <Switch android:id="@+id/sw_fps_overlay"    android:text="5. FPS &amp; Network Real-time" android:layout_width="match_parent" android:paddingVertical="8dp"/>
-            <Switch android:id="@+id/sw_dnd_notif"      android:text="6. DND &amp; Notif Killer"       android:layout_width="match_parent" android:paddingVertical="8dp"/>
-            <Switch android:id="@+id/sw_ram_boost"      android:text="7. RAM Background Anti Lag"   android:layout_width="match_parent" android:paddingVertical="8dp"/>
+            <Switch android:id="@+id/sw_perf_service" android:text="1. Performance Service" android:layout_width="match_parent" android:paddingVertical="8dp"/>
+            <Switch android:id="@+id/sw_anti_lag" android:text="2. Anti Lag Mode" android:layout_width="match_parent" android:paddingVertical="8dp"/>
+            <Switch android:id="@+id/sw_gpu_accel" android:text="3. GPU Acceleration" android:layout_width="match_parent" android:paddingVertical="8dp"/>
+            <Switch android:id="@+id/sw_gpu_anti_lag" android:text="4. GPU Anti Lag" android:layout_width="match_parent" android:paddingVertical="8dp"/>
+            <Switch android:id="@+id/sw_fps_overlay" android:text="5. FPS &amp; Network Real-time" android:layout_width="match_parent" android:paddingVertical="8dp"/>
+            <Switch android:id="@+id/sw_dnd_notif" android:text="6. DND &amp; Notif Killer" android:layout_width="match_parent" android:paddingVertical="8dp"/>
+            <Switch android:id="@+id/sw_ram_boost" android:text="7. RAM Background Anti Lag" android:layout_width="match_parent" android:paddingVertical="8dp"/>
             <Switch android:id="@+id/sw_refresh_unlock" android:text="8. Refresh Rate Unlock 90-120Hz" android:layout_width="match_parent" android:paddingVertical="8dp"/>
         </LinearLayout>
 
-        <!-- 📊 REAL-TIME MONITOR -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <LinearLayout android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="#FFFFFF"
-            android:padding="16dp"
-            android:layout_marginBottom="12dp"
-            android:elevation="2dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📊 Real-time Monitor"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp"/>
-
-            <TextView android:id="@+id/tv_fps"     android:text="FPS: 60"          android:textSize="15sp" android:paddingVertical="4dp" android:textColor="#2E7D32"/>
-            <TextView android:id="@+id/tv_temp"    android:text="Temp: 36.0°C"    android:textSize="15sp" android:paddingVertical="4dp" android:textColor="#E65100"/>
-            <TextView android:id="@+id/tv_network" android:text="WiFi: — | Data: —" android:textSize="15sp" android:paddingVertical="4dp" android:textColor="#1565C0"/>
-            <TextView android:id="@+id/tv_refresh" android:text="Refresh: 60Hz"    android:textSize="15sp" android:paddingVertical="4dp" android:textColor="#9C27B0"/>
-        </LinearLayout>
-
-        <!-- 🎮 GAME SUPPORT -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="#FFFFFF"
-            android:padding="16dp"
-            android:elevation="2dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🎮 Supported Games"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
-
-            <TextView android:id="@+id/tv_game_info"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="• QQ Speed (com.tencent.tmgp.speedmobile)\n• Speed Drifters (com.garena.game.fctw)\n→ Auto-detect &amp; optimize loading speed + FPS"
-                android:textSize="13sp"
-                android:lineSpacingExtra="4dp"
-                android:textColor="#666666"/>
+            android:orientation="vertical" android:background="#FFFFFF"
+            android:padding="16dp" android:elevation="2dp">
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="📊 Real-time Monitor"
+                android:textSize="18sp" android:textStyle="bold" android:layout_marginBottom="12dp"/>
+            <TextView android:id="@+id/tv_fps" android:text="FPS: 60" android:textSize="15sp" android:textColor="#2E7D32"/>
+            <TextView android:id="@+id/tv_temp" android:text="Temp: 36.0°C" android:textSize="15sp" android:textColor="#E65100"/>
+            <TextView android:id="@+id/tv_network" android:text="WiFi: — | Data: —" android:textSize="15sp" android:textColor="#1565C0"/>
+            <TextView android:id="@+id/tv_refresh" android:text="Refresh: 60Hz → 120Hz" android:textSize="15sp" android:textColor="#9C27B0"/>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>
