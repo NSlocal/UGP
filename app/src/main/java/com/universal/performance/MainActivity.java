@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
             if (isRunning) {
                 tvStatus.setText(R.string.running);
                 btnToggle.setText(R.string.stop);
-                Toast.makeText(this, "Performance Active — 120Hz Ready ✅", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "✅ Performance Active — 120Hz Ready!", Toast.LENGTH_SHORT).show();
             } else {
                 tvStatus.setText(R.string.stopped);
                 btnToggle.setText(R.string.start);
