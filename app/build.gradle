@@ -30,7 +30,6 @@ android {
         jvmTarget = '17'
     }
 
-    // Blokir stdlib duplikat
     configurations.all {
         exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk7"
         exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk8"
@@ -38,10 +37,7 @@ android {
 }
 
 dependencies {
-    // ✅ Kotlin Stdlib
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
-
-    // ✅ ANDROID CORE — Dibutuhkan untuk colorPrimary / colorAccent!
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
