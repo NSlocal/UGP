@@ -9,6 +9,7 @@ import android.view.Gravity
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.*
@@ -21,8 +22,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tempText: TextView
     private lateinit var batteryText: TextView
     private lateinit var statusText: TextView
-    private var fpsJob: Job? = null
-    private var tempJob: Job? = null
     private var frameCount = 0
     private var lastTime = System.nanoTime()
 
@@ -77,18 +76,11 @@ class MainActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
         }
 
-        fpsText = createStatRow("FPS", "--/120 Hz", "#4CAF50")
-        tempText = createStatRow("Temperature", "--°C", "#FF9800")
-        batteryText = createStatRow("Battery", "--%", "#03DAC6")
-        statusText = createStatRow("Status", "Initializing...", "#6200EE")
+        fpsText = createStatRow(monitorLayout, "FPS", "--/120 Hz", "#4CAF50")
+        tempText = createStatRow(monitorLayout, "Temperature", "--°C", "#FF9800")
+        batteryText = createStatRow(monitorLayout, "Battery", "--%", "#03DAC6")
+        statusText = createStatRow(monitorLayout, "Status", "Initializing...", "#6200EE")
 
-        monitorLayout.addView(fpsText)
-        monitorLayout.addView(createDivider())
-        monitorLayout.addView(tempText)
-        monitorLayout.addView(createDivider())
-        monitorLayout.addView(batteryText)
-        monitorLayout.addView(createDivider())
-        monitorLayout.addView(statusText)
         monitorPanel.addView(monitorLayout)
         root.addView(monitorPanel)
 
@@ -148,7 +140,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // === CREATE STAT ROW ===
-    private fun createStatRow(label: String, value: String, color: String): LinearLayout {
+    private fun createStatRow(parent: LinearLayout, label: String, value: String, color: String): TextView {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -170,17 +162,17 @@ class MainActivity : AppCompatActivity() {
         row.addView(labelTv)
         row.addView(valueTv)
         row.tag = label
-        return row
-    }
+        parent.addView(row)
 
-    private fun createDivider(): View {
-        return View(this).apply {
+        // Divider
+        parent.addView(View(this).apply {
             setBackgroundColor(Color.parseColor("#333333"))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 1
             ).apply { setMargins(0, 12, 0, 12) }
-        }
+        })
+        return valueTv
     }
 
     // === FEATURE CARD ===
@@ -222,7 +214,7 @@ class MainActivity : AppCompatActivity() {
     // === TOGGLE FEATURE ===
     private fun toggleFeature(id: String, name: String) {
         Toast.makeText(this, "$name → Activated ✅", Toast.LENGTH_SHORT).show()
-        statusText.findViewWithTag<TextView>("Status")?.text = "Active: $name"
+        statusText.text = "Active: $name"
     }
 
     // === REAL-TIME MONITORING ===
@@ -233,7 +225,7 @@ class MainActivity : AppCompatActivity() {
                 updateFPS()
                 updateTemperature()
                 updateBattery()
-                handler.postDelayed(this, 100)
+                handler.postDelayed(this, 500)
             }
         })
     }
@@ -245,7 +237,7 @@ class MainActivity : AppCompatActivity() {
         if (elapsed >= 0.5) {
             val fps = (frameCount / elapsed).roundToInt()
             val cappedFps = fps.coerceAtMost(120)
-            fpsText.findViewWithTag<TextView>("FPS")?.text = "$cappedFps/120 Hz"
+            fpsText.text = "$cappedFps/120 Hz"
             frameCount = 0
             lastTime = now
         }
@@ -259,16 +251,16 @@ class MainActivity : AppCompatActivity() {
                 sensorManager.registerListener(object : android.hardware.SensorEventListener {
                     override fun onSensorChanged(event: android.hardware.SensorEvent) {
                         val temp = event.values[0]
-                        tempText.findViewWithTag<TextView>("Temperature")?.text = "${DecimalFormat("#.#").format(temp)}°C"
+                        tempText.text = "${DecimalFormat("#.#").format(temp)}°C"
                         sensorManager.unregisterListener(this)
                     }
                     override fun onAccuracyChanged(sensor: android.hardware.Sensor, accuracy: Int) {}
                 }, tempSensor, android.hardware.SensorManager.SENSOR_DELAY_NORMAL)
             } else {
-                tempText.findViewWithTag<TextView>("Temperature")?.text = "--°C"
+                tempText.text = "--°C"
             }
         } catch (e: Exception) {
-            tempText.findViewWithTag<TextView>("Temperature")?.text = "N/A"
+            tempText.text = "N/A"
         }
     }
 
@@ -278,22 +270,20 @@ class MainActivity : AppCompatActivity() {
             val level = batteryIntent.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1)
             val scale = batteryIntent.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1)
             val percent = if (level != -1 && scale != -1) (level * 100 / scale.toFloat()).roundToInt() else -1
-            batteryText.findViewWithTag<TextView>("Battery")?.text = if (percent != -1) "$percent%" else "--%"
+            batteryText.text = if (percent != -1) "$percent%" else "--%"
         }
     }
 
     // === PERFORMANCE FIXES ===
     private fun applyPerformanceFixes() {
         try {
-            // Disable GMS wakelock & optimizations
             packageManager.setComponentEnabledSetting(
                 android.content.ComponentName("com.google.android.gms", "com.google.android.gms.StandaloneReferrerReceiver"),
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP
             )
         } catch (e: Exception) { /* ignore */ }
-
-        statusText.findViewWithTag<TextView>("Status")?.text = "All Systems Active ✅"
+        statusText.text = "All Systems Active ✅"
     }
 
     // === NOTIFICATION PERMISSION FIX ===
@@ -318,15 +308,9 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_NOTIFICATION_PERMISSION) {
-            statusText.findViewWithTag<TextView>("Status")?.text =
+            statusText.text =
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                     "Permission Granted ✅" else "Permission Denied ⚠️"
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        fpsJob?.cancel()
-        tempJob?.cancel()
     }
 }
