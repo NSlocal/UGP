@@ -30,27 +30,18 @@ android {
         jvmTarget = '17'
     }
 
-    // ✅ WAJIB: Blokir stdlib duplikat — JANGAN DIHAPUS!
     configurations.all {
         exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk7"
         exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk8"
     }
 }
 
-// ✅ LENGKAP: Semua dependensi dibutuhkan — JANGAN DIHAPUS!
 dependencies {
-    // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
-    
-    // Android Core
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
-    
-    // UI Components
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    
-    // Coroutines / Lifecycle — untuk real-time FPS & monitoring
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.2'
 }
