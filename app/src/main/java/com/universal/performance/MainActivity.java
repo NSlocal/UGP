@@ -1,67 +1,73 @@
-package com.universal.performance;
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="30dp"
+    android:gravity="center_horizontal"
+    android:background="#F5F5F5">
 
-import android.os.Bundle;
-import android.os.Handler;
-import android.widget.Button;
-import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Universal Performance"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#1A73E8"
+        android:layout_marginBottom="40dp"/>
 
-public class MainActivity extends AppCompatActivity {
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status: STOPPED"
+        android:textSize="20sp"
+        android:textColor="#E53935"
+        android:layout_marginBottom="15dp"/>
 
-    private TextView tvStatus, tvFps, tvTemp;
-    private Button btnToggle;
-    private Handler handler;
-    private boolean isRunning = false;
-    private int fpsCount = 0;
-    private long fpsStartTime = System.currentTimeMillis();
+    <TextView
+        android:id="@+id/tv_fps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FPS: 60"
+        android:textSize="18sp"
+        android:textColor="#2E7D32"
+        android:layout_marginBottom="10dp"/>
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    <TextView
+        android:id="@+id/tv_temp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Temperature: 36.0 C"
+        android:textSize="18sp"
+        android:textColor="#E65100"
+        android:layout_marginBottom="10dp"/>
 
-        tvStatus = findViewById(R.id.tv_status);
-        tvFps = findViewById(R.id.tv_fps);
-        tvTemp = findViewById(R.id.tv_temp);
-        btnToggle = findViewById(R.id.btn_toggle);
-        handler = new Handler();
+    <TextView
+        android:id="@+id/tv_cpu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CPU: Optimal"
+        android:textSize="18sp"
+        android:textColor="#1565C0"
+        android:layout_marginBottom="10dp"/>
 
-        btnToggle.setOnClickListener(v -> toggleService());
-        startFpsCounter();
-    }
+    <TextView
+        android:id="@+id/tv_gpu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GPU: Accelerated"
+        android:textSize="18sp"
+        android:textColor="#7B1FA2"
+        android:layout_marginBottom="40dp"/>
 
-    private void toggleService() {
-        isRunning = !isRunning;
-        if (isRunning) {
-            tvStatus.setText("Service: RUNNING");
-            tvStatus.setTextColor(0xFF2E7D32);
-            btnToggle.setText("STOP SERVICE");
-        } else {
-            tvStatus.setText("Service: STOPPED");
-            tvStatus.setTextColor(0xFFE53935);
-            btnToggle.setText("START SERVICE");
-        }
-    }
-
-    private void startFpsCounter() {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                fpsCount++;
-                long now = System.currentTimeMillis();
-                if (now - fpsStartTime >= 1000) {
-                    tvFps.setText("FPS: " + fpsCount);
-                    fpsCount = 0;
-                    fpsStartTime = now;
-                }
-                handler.postDelayed(this, 100);
-            }
-        });
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        handler.removeCallbacksAndMessages(null);
-    }
-}
+    <Button
+        android:id="@+id/btn_toggle"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="START SERVICE"
+        android:textSize="20sp"
+        android:backgroundTint="#1A73E8"
+        android:textColor="#FFFFFF"/>
+</LinearLayout>
+    
