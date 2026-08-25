@@ -1,4 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">UGP</string>
+    <string name="app_name">UGP — Universal Performance</string>
+    <string name="fps_label">FPS</string>
+    <string name="temp_label">Temperature</string>
+    <string name="battery_label">Battery</string>
+    <string name="status_label">Status</string>
+    <string name="speed_title">Speed Bypass</string>
+    <string name="speed_desc">Unlock frame rate • 120Hz smooth • Anti-freeze</string>
+    <string name="lag_title">Anti-Lag & Freeze</string>
+    <string name="lag_desc">Stabilize CPU/GPU • Reduce jitter • No frame drop</string>
+    <string name="battery_title">Battery Saver & Cooler</string>
+    <string name="battery_desc">Optimize power • Reduce heat • No overheating</string>
+    <string name="graphics_title">Graphics & Stability</string>
+    <string name="graphics_desc">Max FPS • Smooth render • Gameplay stable</string>
+    <string name="gms_title">No Google Services</string>
+    <string name="gms_desc">Disable GMS • Remove lag source • Lighter runtime</string>
+    <string name="active">Activated Successfully</string>
+    <string name="permission_granted">Notification Permission Granted</string>
+    <string name="permission_denied">Notification Permission Denied</string>
 </resources>
