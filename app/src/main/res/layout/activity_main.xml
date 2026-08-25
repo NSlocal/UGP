@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- 📌 JUDUL -->
+        <!-- JUDUL -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -21,9 +21,8 @@
             android:textColor="#1A73E8"
             android:layout_marginBottom="20dp"/>
 
-        <!-- 📊 STATUS UTAMA -->
+        <!-- STATUS CARD -->
         <LinearLayout
-            android:id="@+id/card_status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#FFFFFF"
@@ -50,7 +49,6 @@
                 android:textColor="#E53935"
                 android:layout_marginBottom="8dp"/>
 
-            <!-- FPS & SUHU REAL-TIME -->
             <TextView
                 android:id="@+id/tv_fps"
                 android:layout_width="wrap_content"
@@ -87,7 +85,7 @@
                 android:textColor="#7B1FA2"/>
         </LinearLayout>
 
-        <!-- 🎛️ KONTROL FITUR -->
+        <!-- KONTROL FITUR -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -147,7 +145,7 @@
                 android:paddingVertical="10dp"/>
         </LinearLayout>
 
-        <!-- 📌 TOMBOL UTAMA -->
+        <!-- TOMBOL UTAMA -->
         <Button
             android:id="@+id/btn_toggle"
             android:layout_width="match_parent"
