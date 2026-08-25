@@ -18,8 +18,18 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      # ✨ OTOMATIS DOWNLOAD gradle-wrapper.jar — TANPA PERLU UPLOAD MANUAL!
+      - name: Prepare Gradle Wrapper
+        run: |
+          mkdir -p gradle/wrapper
+          wget -O gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.5.0/gradle-wrapper-wrapper/gradle-wrapper.jar || \
+          wget -O gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.5.0/gradle-wrapper-wrapper/gradle-wrapper.jar || \
+          curl -L -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.5.0/gradle-wrapper-wrapper/gradle-wrapper.jar
+
+      - name: Grant execute permission
+        run: |
+          chmod +x gradlew
+          chmod +x gradle/wrapper/gradle-wrapper.jar
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug
