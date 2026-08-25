@@ -3,6 +3,5 @@
     <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowBackground">@color/white</item>
     </style>
 </resources>
