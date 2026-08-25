@@ -18,20 +18,18 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # ✅ CARA PALING AMAN — Pakai Gradle Wrapper Generator Resmi
-      - name: Setup Gradle Wrapper — Download JAR Resmi
-        run: |
-          mkdir -p gradle/wrapper
-          # 🔗 LINK RESMI & BENAR — dari repo Gradle GitHub
-          curl -L -o gradle/wrapper/gradle-wrapper.jar "https://raw.githubusercontent.com/gradle/gradle/v8.5.0/subprojects/wrapper/src/main/resources/org/gradle/wrapper/gradle-wrapper.jar"
-          # Verifikasi file terunduh benar
-          ls -la gradle/wrapper/
-          file gradle/wrapper/gradle-wrapper.jar
+      # ✅ PAKAI GRADLE RESMI — TANPA PERLU JAR!
+      - name: Setup Gradle 8.5
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.5'
 
-      - name: Grant execute permission
+      # ✅ BUAT gradlew & wrapper OTOMATIS
+      - name: Generate Gradle Wrapper
         run: |
+          gradle wrapper --gradle-version 8.5
           chmod +x gradlew
-          chmod +x gradle/wrapper/gradle-wrapper.jar
+          ls -la gradle/wrapper/
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug
