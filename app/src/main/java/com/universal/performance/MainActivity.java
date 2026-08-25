@@ -2,6 +2,7 @@ package com.universal.performance;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -11,116 +12,93 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
-
-    // ✅ FITUR 1-8
-    private Switch swPerfService, swAntiLag, swGpuAccel, swGpuAntiLag, 
-                   swFpsOverlay, swDndNotif, swRamBoost, swRefreshUnlock;
-    private TextView tvStatus, tvFps, tvTemp, tvNetwork, tvRefresh, tvGame;
+    private Switch swService, swAntiLag, swGpuAccel, swGpuAntiLag, swFps, swDnd, swRam, swRefresh;
+    private TextView tvStatus, tvRefresh;
     private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         setContentView(R.layout.activity_main);
-
         prefs = getSharedPreferences("Prefs", MODE_PRIVATE);
-
-        // ✅ Minta Semua Permission
-        checkAllPermissions();
-
-        // ✅ Init Semua UI
+        checkPermissions();
         initViews();
-        loadSavedSettings();
+        loadSettings();
         setupListeners();
+        updateRefreshDisplay();
     }
 
-    private void checkAllPermissions() {
-        // Overlay Permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M 
-            && !Settings.canDrawOverlays(this)) {
-            Intent i = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-            startActivity(i);
-            Toast.makeText(this, "Izinkan Tampil di Atas Aplikasi Lain", Toast.LENGTH_LONG).show();
-        }
-        // Write Settings
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M 
-            && !Settings.System.canWrite(this)) {
-            Intent i = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS_PERMISSION);
-            startActivity(i);
-        }
-        // Notification Permission (Android 13+)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requestPermissions(new String[]{
-                android.Manifest.permission.POST_NOTIFICATIONS
-            }, 1001);
+    private void checkPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION));
+            }
+            if (!Settings.System.canWrite(this)) {
+                Intent i = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS_PERMISSION);
+                i.setData(Uri.parse("package:" + getPackageName()));
+                startActivity(i);
+                Toast.makeText(this, "Izinkan Ubah Pengaturan Sistem → untuk 120Hz", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
     private void initViews() {
-        swPerfService   = findViewById(R.id.sw_perf_service);   // 1. Performance Service
-        swAntiLag       = findViewById(R.id.sw_anti_lag);       // 2. Anti Lag Mode
-        swGpuAccel      = findViewById(R.id.sw_gpu_accel);      // 3. GPU Acceleration
-        swGpuAntiLag    = findViewById(R.id.sw_gpu_anti_lag);   // 4. GPU Anti Lag
-        swFpsOverlay    = findViewById(R.id.sw_fps_overlay);     // 5. FPS & Network Real-time
-        swDndNotif      = findViewById(R.id.sw_dnd_notif);      // 6. DND & Notif Killer
-        swRamBoost      = findViewById(R.id.sw_ram_boost);       // 7. RAM Background Anti Lag
-        swRefreshUnlock = findViewById(R.id.sw_refresh_unlock);  // 8. Refresh Rate Unlock
-
-        tvStatus    = findViewById(R.id.tv_status);
-        tvFps       = findViewById(R.id.tv_fps);
-        tvTemp      = findViewById(R.id.tv_temp);
-        tvNetwork   = findViewById(R.id.tv_network);
-        tvRefresh   = findViewById(R.id.tv_refresh);
-        tvGame      = findViewById(R.id.tv_game_info);
+        swService = findViewById(R.id.sw_perf_service);
+        swAntiLag = findViewById(R.id.sw_anti_lag);
+        swGpuAccel = findViewById(R.id.sw_gpu_accel);
+        swGpuAntiLag = findViewById(R.id.sw_gpu_anti_lag);
+        swFps = findViewById(R.id.sw_fps_overlay);
+        swDnd = findViewById(R.id.sw_dnd_notif);
+        swRam = findViewById(R.id.sw_ram_boost);
+        swRefresh = findViewById(R.id.sw_refresh_unlock);
+        tvStatus = findViewById(R.id.tv_status);
+        tvRefresh = findViewById(R.id.tv_refresh);
     }
 
-    private void loadSavedSettings() {
-        swPerfService.setChecked(prefs.getBoolean("perf_service", false));
+    private void loadSettings() {
+        swService.setChecked(prefs.getBoolean("service", false));
         swAntiLag.setChecked(prefs.getBoolean("anti_lag", true));
         swGpuAccel.setChecked(prefs.getBoolean("gpu_accel", true));
         swGpuAntiLag.setChecked(prefs.getBoolean("gpu_anti_lag", true));
-        swFpsOverlay.setChecked(prefs.getBoolean("fps_overlay", true));
-        swDndNotif.setChecked(prefs.getBoolean("dnd_notif", false));
-        swRamBoost.setChecked(prefs.getBoolean("ram_boost", true));
-        swRefreshUnlock.setChecked(prefs.getBoolean("refresh_unlock", true));
+        swFps.setChecked(prefs.getBoolean("fps", true));
+        swDnd.setChecked(prefs.getBoolean("dnd", false));
+        swRam.setChecked(prefs.getBoolean("ram", true));
+        swRefresh.setChecked(prefs.getBoolean("refresh", true));
     }
 
     private void setupListeners() {
-        // ✅ 1. Performance Service — START / STOP
-        swPerfService.setOnCheckedChangeListener((v, isOn) -> {
-            prefs.edit().putBoolean("perf_service", isOn).apply();
+        swService.setOnCheckedChangeListener((v, isOn) -> {
+            prefs.edit().putBoolean("service", isOn).apply();
             if (isOn) {
                 startService(new Intent(this, PerformanceService.class));
-                tvStatus.setText("✅ Status: RUNNING");
-                Toast.makeText(this, "Service Started — Game Optimizations Active", Toast.LENGTH_SHORT).show();
+                tvStatus.setText(R.string.status_running);
             } else {
                 stopService(new Intent(this, PerformanceService.class));
                 stopService(new Intent(this, FpsOverlayService.class));
-                tvStatus.setText("⏹️ Status: STOPPED");
+                tvStatus.setText(R.string.status_stopped);
             }
         });
 
-        // ✅ 2-8 — Simpan Settingan Langsung
-        swAntiLag.setOnCheckedChangeListener((v, i) -> saveAndUpdate("anti_lag", i));
-        swGpuAccel.setOnCheckedChangeListener((v, i) -> saveAndUpdate("gpu_accel", i));
-        swGpuAntiLag.setOnCheckedChangeListener((v, i) -> saveAndUpdate("gpu_anti_lag", i));
-        swFpsOverlay.setOnCheckedChangeListener((v, isOn) -> {
-            prefs.edit().putBoolean("fps_overlay", isOn).apply();
-            if (isOn && prefs.getBoolean("perf_service", false)) {
+        swRefresh.setOnCheckedChangeListener((v, isOn) -> {
+            prefs.edit().putBoolean("refresh", isOn).apply();
+            if (isOn) {
+                float max = RefreshRateHelper.getMax(this);
+                RefreshRateHelper.setRefreshRate(this, max);
+                Toast.makeText(this, "Refresh Rate: " + (int)max + "Hz ACTIVE ✅", Toast.LENGTH_SHORT).show();
+            }
+            updateRefreshDisplay();
+        });
+
+        swFps.setOnCheckedChangeListener((v, isOn) -> {
+            prefs.edit().putBoolean("fps", isOn).apply();
+            if (isOn && prefs.getBoolean("service", false)) {
                 startService(new Intent(this, FpsOverlayService.class));
             } else stopService(new Intent(this, FpsOverlayService.class));
         });
-        swDndNotif.setOnCheckedChangeListener((v, i) -> saveAndUpdate("dnd_notif", i));
-        swRamBoost.setOnCheckedChangeListener((v, i) -> saveAndUpdate("ram_boost", i));
-        swRefreshUnlock.setOnCheckedChangeListener((v, i) -> saveAndUpdate("refresh_unlock", i));
     }
 
-    private void saveAndUpdate(String key, boolean value) {
-        prefs.edit().putBoolean(key, value).apply();
-        if (prefs.getBoolean("perf_service", false)) {
-            Intent update = new Intent("com.universal.performance.UPDATE");
-            update.putExtra(key, value);
-            sendBroadcast(update);
-        }
+    private void updateRefreshDisplay() {
+        float max = RefreshRateHelper.getMax(this);
+        tvRefresh.setText("Refresh: " + (int)max + "Hz ✅");
     }
 }
