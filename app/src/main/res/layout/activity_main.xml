@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:padding="30dp"
     android:gravity="center_horizontal">
 
     <TextView
@@ -12,21 +12,20 @@
         android:text="Universal Performance"
         android:textSize="28sp"
         android:textStyle="bold"
-        android:layout_marginBottom="40dp"/>
+        android:layout_marginBottom="50dp"/>
 
     <TextView
         android:id="@+id/tv_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/stopped"
-        android:textSize="20sp"
-        android:layout_marginBottom="30dp"/>
+        android:textSize="22sp"
+        android:layout_marginBottom="40dp"/>
 
     <Button
         android:id="@+id/btn_toggle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:text="@string/start"
-        android:textSize="18sp"
-        android:paddingVertical="12dp"/>
+        android:textSize="20sp"/>
 </LinearLayout>
