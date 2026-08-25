@@ -32,10 +32,12 @@ class MainActivity : AppCompatActivity() {
     private val choreographer = android.view.Choreographer.getInstance()
     private var fpsCallback: android.view.Choreographer.FrameCallback? = null
 
+    // ✅ 5 FITUR TOTAL!
     private var speedBypassEnabled = true
     private var batterySaverEnabled = true
     private var graphicsEnabled = true
     private var noGmsEnabled = true
+    private var showStatusOverlay = true // 🆕 Fitur 5: Show Status Active
 
     private var simulatedCpu = 35.0
     private var simulatedGpu = 40.0
@@ -88,6 +90,7 @@ class MainActivity : AppCompatActivity() {
         header.addView(title)
         root.addView(header)
 
+        // ✅ FPS GPU CPU MONITOR
         val monitorContainer = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
@@ -173,6 +176,7 @@ class MainActivity : AppCompatActivity() {
         monitorContainer.addView(monitorBg)
         root.addView(monitorContainer)
 
+        // ✅ Info Panel
         val infoCard = CardView(this).apply {
             setCardBackgroundColor(Color.parseColor("#1E1E1E"))
             radius = 16f
@@ -186,10 +190,60 @@ class MainActivity : AppCompatActivity() {
         val infoLayout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         tempValue = createInfoRow(infoLayout, "Temperature", "--°C", "#FF9800")
         batteryValue = createInfoRow(infoLayout, "Battery", "--%", "#03DAC6")
-        statusValue = createInfoRow(infoLayout, "Status", "0/4 Features Active", "#6200EE")
+        statusValue = createInfoRow(infoLayout, "Status", "0/5 Features Active", "#6200EE")
         infoCard.addView(infoLayout)
         root.addView(infoCard)
 
+        // ✅ Fitur 5: Show Status Active — BARU!
+        val feature5Card = CardView(this).apply {
+            setCardBackgroundColor(Color.parseColor("#1E1E1E"))
+            radius = 20f
+            cardElevation = 6f
+            useCompatPadding = true
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { setMargins(24, 8, 24, 16) }
+        }
+        val feature5Content = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(28, 24, 28, 24)
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        val feature5Text = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        }
+        feature5Text.addView(TextView(this).apply {
+            text = "📊 Show Status Active"
+            textSize = 19f
+            setTextColor(Color.parseColor("#03DAC6"))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(0, 0, 0, 6)
+        })
+        feature5Text.addView(TextView(this).apply {
+            text = "Display FPS/GPU/CPU status • Quick View"
+            textSize = 14f
+            setTextColor(Color.parseColor("#AAAAAA"))
+            setLineSpacing(4f, 1f)
+        })
+        val toggle5 = Switch(this).apply {
+            isChecked = showStatusOverlay
+            setOnCheckedChangeListener { _, isChecked ->
+                showStatusOverlay = isChecked
+                updateStatus()
+                Toast.makeText(this@MainActivity,
+                    if (isChecked) "Show Status → Enabled ✅" else "Show Status → Disabled ⚠️",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+        feature5Content.addView(feature5Text)
+        feature5Content.addView(toggle5)
+        feature5Card.addView(feature5Content)
+        root.addView(feature5Card)
+
+        // ✅ Fitur 1-4
         val scroll = ScrollView(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -239,9 +293,16 @@ class MainActivity : AppCompatActivity() {
         applyPerformanceFixes()
     }
 
+    // ✅ UPDATE STATUS — 5 FITUR SEKARANG!
     private fun updateStatus() {
-        val count = listOf(speedBypassEnabled, batterySaverEnabled, graphicsEnabled, noGmsEnabled).count { it }
-        statusValue.text = "$count/4 Features Active ✅"
+        val activeCount = listOf(
+            speedBypassEnabled,
+            batterySaverEnabled,
+            graphicsEnabled,
+            noGmsEnabled,
+            showStatusOverlay
+        ).count { it }
+        statusValue.text = "$activeCount/5 Features Active ✅"
     }
 
     private fun startRealTimeMonitoring() {
@@ -315,18 +376,19 @@ class MainActivity : AppCompatActivity() {
             gravity = Gravity.CENTER_VERTICAL
             setPadding(0, 10, 0, 10)
         }
-        row.addView(TextView(this).apply {
+        val labelTv = TextView(this).apply {
             text = label
             textSize = 15f
             setTextColor(Color.parseColor("#BBBBBB"))
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-        })
+        }
         val valueTv = TextView(this).apply {
             text = value
             textSize = 16f
             setTextColor(Color.parseColor(color))
             setTypeface(null, android.graphics.Typeface.BOLD)
         }
+        row.addView(labelTv)
         row.addView(valueTv)
         parent.addView(row)
         parent.addView(View(this).apply {
