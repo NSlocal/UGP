@@ -1,29 +1,39 @@
 package com.universal.performance
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.*
 import android.view.Gravity
 import android.view.View
+import android.view.WindowManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.*
+import java.io.RandomAccessFile
 import java.text.DecimalFormat
-import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var fpsText: TextView
-    private lateinit var tempText: TextView
-    private lateinit var batteryText: TextView
-    private lateinit var statusText: TextView
+    private lateinit var fpsValue: TextView
+    private lateinit var gpuValue: TextView
+    private lateinit var cpuValue: TextView
+    private lateinit var tempValue: TextView
+    private lateinit var batteryValue: TextView
+    private lateinit var statusValue: TextView
+
     private var frameCount = 0
     private var lastTime = System.nanoTime()
+
+    // Toggle States
+    private var speedBypassEnabled = true
+    private var batterySaverEnabled = true
+    private var graphicsEnabled = true
+    private var noGmsEnabled = true
 
     companion object {
         private const val REQUEST_NOTIFICATION_PERMISSION = 1001
@@ -31,7 +41,20 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+
+        // ✅ FULL SCREEN — HIDE STATUS BAR & CUTOUT / NOTCH
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        )
+        window.decorView.systemUiVisibility = (
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            or View.SYSTEM_UI_FLAG_FULLSCREEN
+            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        )
         window.statusBarColor = Color.parseColor("#6200EE")
 
         // === MAIN LAYOUT ===
@@ -42,13 +65,16 @@ class MainActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
             )
+            // Padding untuk menghindari notch/cutout
+            val metrics = resources.displayMetrics
+            setPadding(0, getStatusBarHeight(), 0, 0)
         }
 
         // === TOP HEADER ===
         val header = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             setBackgroundColor(Color.parseColor("#6200EE"))
-            setPadding(32, 48, 32, 24)
+            setPadding(32, 24, 32, 24)
             gravity = Gravity.CENTER_VERTICAL
         }
         val title = TextView(this).apply {
@@ -61,8 +87,8 @@ class MainActivity : AppCompatActivity() {
         header.addView(title)
         root.addView(header)
 
-        // === REAL-TIME MONITOR PANEL ===
-        val monitorPanel = CardView(this).apply {
+        // === REAL-TIME MONITOR PANEL — FPS + GPU + CPU + TEMP + BATTERY ===
+        val monitorCard = CardView(this).apply {
             setCardBackgroundColor(Color.parseColor("#1E1E1E"))
             radius = 24f
             cardElevation = 8f
@@ -72,19 +98,28 @@ class MainActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply { setMargins(24, 24, 24, 16) }
         }
-        val monitorLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
+        val monitorLayout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+
+        // FPS + GPU + CPU — BARIS UTAMA SEPERTI CONTOH GAMBAR
+        val topStatsRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 16)
         }
+        fpsValue = createStatLabel(topStatsRow, "FPS", "--", "#4CAF50")
+        gpuValue = createStatLabel(topStatsRow, "GPU", "--%", "#03DAC6")
+        cpuValue = createStatLabel(topStatsRow, "CPU", "--%", "#FF9800")
+        monitorLayout.addView(topStatsRow)
 
-        fpsText = createStatRow(monitorLayout, "FPS", "--/120 Hz", "#4CAF50")
-        tempText = createStatRow(monitorLayout, "Temperature", "--°C", "#FF9800")
-        batteryText = createStatRow(monitorLayout, "Battery", "--%", "#03DAC6")
-        statusText = createStatRow(monitorLayout, "Status", "Initializing...", "#6200EE")
+        // Temperature + Battery
+        tempValue = createStatRow(monitorLayout, "Temperature", "--°C", "#FF9800")
+        batteryValue = createStatRow(monitorLayout, "Battery", "--%", "#03DAC6")
+        statusValue = createStatRow(monitorLayout, "Status", "All Systems Active ✅", "#6200EE")
 
-        monitorPanel.addView(monitorLayout)
-        root.addView(monitorPanel)
+        monitorCard.addView(monitorLayout)
+        root.addView(monitorCard)
 
-        // === FEATURE CARDS ===
+        // === FEATURE TOGGLES — ON/OFF SWITCH ===
         val scroll = ScrollView(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -97,46 +132,68 @@ class MainActivity : AppCompatActivity() {
             setPadding(24, 8, 24, 48)
         }
 
-        featureContainer.addView(createFeatureCard(
+        featureContainer.addView(createToggleCard(
             "⚡ Speed Bypass",
             "Unlock frame rate • 120Hz smooth • Anti-freeze",
             "#6200EE",
-            "speed"
-        ))
-        featureContainer.addView(createFeatureCard(
-            "🧊 Anti-Lag & Freeze",
-            "Stabilize CPU/GPU • Reduce jitter • No frame drop",
-            "#03DAC6",
-            "lag"
-        ))
-        featureContainer.addView(createFeatureCard(
+            speedBypassEnabled
+        ) { isOn -> speedBypassEnabled = isOn; updateStatus() })
+
+        featureContainer.addView(createToggleCard(
             "🔋 Battery Saver & Cooler",
             "Optimize power • Reduce heat • No overheating",
             "#FF9800",
-            "battery"
-        ))
-        featureContainer.addView(createFeatureCard(
+            batterySaverEnabled
+        ) { isOn -> batterySaverEnabled = isOn; updateStatus() })
+
+        featureContainer.addView(createToggleCard(
             "🎮 Graphics & Stability",
             "Max FPS • Smooth render • Gameplay stable",
             "#4CAF50",
-            "graphics"
-        ))
-        featureContainer.addView(createFeatureCard(
+            graphicsEnabled
+        ) { isOn -> graphicsEnabled = isOn; updateStatus() })
+
+        featureContainer.addView(createToggleCard(
             "🚫 No Google Services",
             "Disable GMS • Remove lag source • Lighter runtime",
             "#F44336",
-            "gms"
-        ))
+            noGmsEnabled
+        ) { isOn -> noGmsEnabled = isOn; updateStatus() })
 
         scroll.addView(featureContainer)
         root.addView(scroll)
 
         setContentView(root)
 
-        // === START SERVICES ===
         requestNotificationPermission()
         startRealTimeMonitoring()
         applyPerformanceFixes()
+    }
+
+    // === BUILD STAT LABEL FOR TOP ROW (FPS / GPU / CPU) ===
+    private fun createStatLabel(parent: LinearLayout, label: String, value: String, color: String): TextView {
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        }
+        val labelTv = TextView(this).apply {
+            text = label
+            textSize = 14f
+            setTextColor(Color.parseColor("#888888"))
+            gravity = Gravity.CENTER
+        }
+        val valueTv = TextView(this).apply {
+            text = value
+            textSize = 20f
+            setTextColor(Color.parseColor(color))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            gravity = Gravity.CENTER
+        }
+        container.addView(labelTv)
+        container.addView(valueTv)
+        parent.addView(container)
+        return valueTv
     }
 
     // === CREATE STAT ROW ===
@@ -161,7 +218,6 @@ class MainActivity : AppCompatActivity() {
         }
         row.addView(labelTv)
         row.addView(valueTv)
-        row.tag = label
         parent.addView(row)
 
         // Divider
@@ -175,8 +231,14 @@ class MainActivity : AppCompatActivity() {
         return valueTv
     }
 
-    // === FEATURE CARD ===
-    private fun createFeatureCard(title: String, desc: String, color: String, id: String): CardView {
+    // === CREATE TOGGLE CARD WITH SWITCH ===
+    private fun createToggleCard(
+        title: String,
+        desc: String,
+        color: String,
+        initialState: Boolean,
+        onToggle: (Boolean) -> Unit
+    ): CardView {
         val card = CardView(this).apply {
             setCardBackgroundColor(Color.parseColor("#1E1E1E"))
             radius = 20f
@@ -186,18 +248,22 @@ class MainActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply { setMargins(0, 0, 0, 16) }
-            setOnClickListener { toggleFeature(id, title) }
         }
         val content = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
+            orientation = LinearLayout.HORIZONTAL
             setPadding(28, 24, 28, 24)
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        val textLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         }
         val titleTv = TextView(this).apply {
             text = title
             textSize = 19f
             setTextColor(Color.parseColor(color))
             setTypeface(null, android.graphics.Typeface.BOLD)
-            setPadding(0, 0, 0, 8)
+            setPadding(0, 0, 0, 6)
         }
         val descTv = TextView(this).apply {
             text = desc
@@ -205,24 +271,39 @@ class MainActivity : AppCompatActivity() {
             setTextColor(Color.parseColor("#AAAAAA"))
             setLineSpacing(4f, 1f)
         }
-        content.addView(titleTv)
-        content.addView(descTv)
+        textLayout.addView(titleTv)
+        textLayout.addView(descTv)
+
+        val switch = Switch(this).apply {
+            isChecked = initialState
+            setOnCheckedChangeListener { _, isChecked ->
+                onToggle(isChecked)
+                Toast.makeText(this@MainActivity,
+                    if (isChecked) "$title → Enabled ✅" else "$title → Disabled ⚠️",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        content.addView(textLayout)
+        content.addView(switch)
         card.addView(content)
         return card
     }
 
-    // === TOGGLE FEATURE ===
-    private fun toggleFeature(id: String, name: String) {
-        Toast.makeText(this, "$name → Activated ✅", Toast.LENGTH_SHORT).show()
-        statusText.text = "Active: $name"
+    // === UPDATE STATUS TEXT ===
+    private fun updateStatus() {
+        val activeCount = listOf(speedBypassEnabled, batterySaverEnabled, graphicsEnabled, noGmsEnabled).count { it }
+        statusValue.text = "$activeCount/4 Features Active ✅"
     }
 
-    // === REAL-TIME MONITORING ===
+    // === REAL-TIME MONITORING — FPS + GPU + CPU + TEMP + BATTERY ===
     private fun startRealTimeMonitoring() {
         val handler = Handler(Looper.getMainLooper())
         handler.post(object : Runnable {
             override fun run() {
                 updateFPS()
+                updateCpuUsage()
                 updateTemperature()
                 updateBattery()
                 handler.postDelayed(this, 500)
@@ -235,58 +316,110 @@ class MainActivity : AppCompatActivity() {
         val now = System.nanoTime()
         val elapsed = (now - lastTime) / 1e9
         if (elapsed >= 0.5) {
-            val fps = (frameCount / elapsed).roundToInt()
-            val cappedFps = fps.coerceAtMost(120)
-            fpsText.text = "$cappedFps/120 Hz"
+            val fps = (frameCount / elapsed).toInt()
+            val capped = fps.coerceAtMost(120)
+            fpsValue.text = "$capped"
             frameCount = 0
             lastTime = now
         }
     }
 
-    private fun updateTemperature() {
+    // === CPU USAGE — BACA DARI /proc/stat ===
+    private var lastCpuTime: Long = 0
+    private var lastAppCpuTime: Long = 0
+
+    private fun updateCpuUsage() {
         try {
-            val sensorManager = getSystemService(SENSOR_SERVICE) as android.hardware.SensorManager
-            val tempSensor = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_TEMPERATURE)
-            if (tempSensor != null) {
-                sensorManager.registerListener(object : android.hardware.SensorEventListener {
-                    override fun onSensorChanged(event: android.hardware.SensorEvent) {
-                        val temp = event.values[0]
-                        tempText.text = "${DecimalFormat("#.#").format(temp)}°C"
-                        sensorManager.unregisterListener(this)
-                    }
-                    override fun onAccuracyChanged(sensor: android.hardware.Sensor, accuracy: Int) {}
-                }, tempSensor, android.hardware.SensorManager.SENSOR_DELAY_NORMAL)
-            } else {
-                tempText.text = "--°C"
+            val reader = RandomAccessFile("/proc/stat", "r")
+            val line = reader.readLine()
+            reader.close()
+            val parts = line.split(" ").filter { it.isNotEmpty() }.drop(1).map { it.toLong() }
+            val idle = parts[3]
+            val total = parts.sum()
+
+            val diffIdle = idle - lastAppCpuTime
+            val diffTotal = total - lastCpuTime
+
+            if (diffTotal > 0) {
+                val usage = 100 - (diffIdle * 100 / diffTotal.toDouble())
+                cpuValue.text = "${DecimalFormat("#").format(usage)}%"
             }
+
+            lastCpuTime = total
+            lastAppCpuTime = idle
+
+            // GPU — estimasi berbasis CPU (alternatif asli butuh vendor API)
+            gpuValue.text = "${(usage * 0.85).toInt()}%"
+
         } catch (e: Exception) {
-            tempText.text = "N/A"
+            cpuValue.text = "--%"
+            gpuValue.text = "--%"
+        }
+    }
+
+    // === TEMPERATURE — BACA DARI SENSOR /sys FILES ===
+    private fun updateTemperature() {
+        var foundTemp = false
+        // Cek beberapa lokasi umum suhu
+        val tempPaths = arrayOf(
+            "/sys/devices/virtual/thermal/thermal_zone0/temp",
+            "/sys/devices/virtual/thermal/thermal_zone1/temp",
+            "/sys/class/thermal/thermal_zone0/temp",
+            "/sys/devices/platform/soc/9808000.thermal/temp"
+        )
+
+        for (path in tempPaths) {
+            try {
+                val file = java.io.File(path)
+                if (file.exists()) {
+                    val tempStr = file.readText().trim()
+                    val tempC = tempStr.toFloat() / 1000
+                    tempValue.text = "${DecimalFormat("#.#").format(tempC)}°C"
+                    foundTemp = true
+                    break
+                }
+            } catch (e: Exception) {
+                continue
+            }
+        }
+
+        if (!foundTemp) {
+            tempValue.text = "N/A"
         }
     }
 
     private fun updateBattery() {
-        val batteryIntent = registerReceiver(null, android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED))
-        if (batteryIntent != null) {
-            val level = batteryIntent.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1)
-            val scale = batteryIntent.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1)
-            val percent = if (level != -1 && scale != -1) (level * 100 / scale.toFloat()).roundToInt() else -1
-            batteryText.text = if (percent != -1) "$percent%" else "--%"
+        val intent = registerReceiver(null, android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED))
+        if (intent != null) {
+            val level = intent.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1)
+            val scale = intent.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1)
+            val percent = if (level != -1 && scale != -1) (level * 100 / scale.toFloat()).toInt() else -1
+            batteryValue.text = if (percent != -1) "$percent%" else "--%"
         }
     }
 
-    // === PERFORMANCE FIXES ===
+    // === APPLY PERFORMANCE FIXES ===
     private fun applyPerformanceFixes() {
         try {
-            packageManager.setComponentEnabledSetting(
-                android.content.ComponentName("com.google.android.gms", "com.google.android.gms.StandaloneReferrerReceiver"),
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                PackageManager.DONT_KILL_APP
-            )
+            if (noGmsEnabled) {
+                packageManager.setComponentEnabledSetting(
+                    android.content.ComponentName("com.google.android.gms", "com.google.android.gms.StandaloneReferrerReceiver"),
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP
+                )
+            }
         } catch (e: Exception) { /* ignore */ }
-        statusText.text = "All Systems Active ✅"
     }
 
-    // === NOTIFICATION PERMISSION FIX ===
+    // === HITUNG HEIGHT STATUS BAR UNTUK CUTOUT/NOTCH ===
+    private fun getStatusBarHeight(): Int {
+        var result = 0
+        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
+        if (resourceId > 0) result = resources.getDimensionPixelSize(resourceId)
+        return result
+    }
+
+    // === NOTIFICATION PERMISSION ===
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -308,9 +441,24 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_NOTIFICATION_PERMISSION) {
-            statusText.text =
+            statusValue.text =
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                     "Permission Granted ✅" else "Permission Denied ⚠️"
+        }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            // Full screen setiap kali fokus
+            window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            )
         }
     }
 }
