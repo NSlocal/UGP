@@ -29,16 +29,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
-                startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION));
-            }
-            if (!Settings.System.canWrite(this)) {
-                Intent i = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS_PERMISSION);
-                i.setData(Uri.parse("package:" + getPackageName()));
-                startActivity(i);
-                Toast.makeText(this, "Izinkan Ubah Pengaturan Sistem → untuk 120Hz", Toast.LENGTH_LONG).show();
-            }
+        // ✅ SYSTEM_ALERT_WINDOW — untuk FPS Overlay
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M 
+            && !Settings.canDrawOverlays(this)) {
+            Intent overlayIntent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+            overlayIntent.setData(Uri.parse("package:" + getPackageName()));
+            startActivity(overlayIntent);
+            Toast.makeText(this, "Izinkan Tampil di Atas Aplikasi", Toast.LENGTH_LONG).show();
+        }
+
+        // ✅ WRITE_SETTINGS — untuk 120Hz — INI YANG DIPERBAIKI!
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M 
+            && !Settings.System.canWrite(this)) {
+            Intent writeIntent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS); // ✅ BENAR!
+            writeIntent.setData(Uri.parse("package:" + getPackageName()));
+            startActivity(writeIntent);
+            Toast.makeText(this, "Izinkan Ubah Pengaturan Sistem → untuk 120Hz", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -71,11 +77,11 @@ public class MainActivity extends AppCompatActivity {
             prefs.edit().putBoolean("service", isOn).apply();
             if (isOn) {
                 startService(new Intent(this, PerformanceService.class));
-                tvStatus.setText(R.string.status_running);
+                tvStatus.setText("✅ Status: RUNNING");
             } else {
                 stopService(new Intent(this, PerformanceService.class));
                 stopService(new Intent(this, FpsOverlayService.class));
-                tvStatus.setText(R.string.status_stopped);
+                tvStatus.setText("⏹️ Status: STOPPED");
             }
         });
 
