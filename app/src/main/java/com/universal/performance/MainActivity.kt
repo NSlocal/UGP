@@ -66,7 +66,6 @@ class MainActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.MATCH_PARENT
             )
             // Padding untuk menghindari notch/cutout
-            val metrics = resources.displayMetrics
             setPadding(0, getStatusBarHeight(), 0, 0)
         }
 
@@ -326,7 +325,7 @@ class MainActivity : AppCompatActivity() {
 
     // === CPU USAGE — BACA DARI /proc/stat ===
     private var lastCpuTime: Long = 0
-    private var lastAppCpuTime: Long = 0
+    private var lastIdleTime: Long = 0
 
     private fun updateCpuUsage() {
         try {
@@ -337,19 +336,18 @@ class MainActivity : AppCompatActivity() {
             val idle = parts[3]
             val total = parts.sum()
 
-            val diffIdle = idle - lastAppCpuTime
+            val diffIdle = idle - lastIdleTime
             val diffTotal = total - lastCpuTime
 
             if (diffTotal > 0) {
-                val usage = 100 - (diffIdle * 100 / diffTotal.toDouble())
-                cpuValue.text = "${DecimalFormat("#").format(usage)}%"
+                val cpuUsage = 100 - (diffIdle * 100 / diffTotal.toDouble())
+                cpuValue.text = "${DecimalFormat("#").format(cpuUsage)}%"
+                // GPU — estimasi berbasis CPU
+                gpuValue.text = "${DecimalFormat("#").format(cpuUsage * 0.85)}%"
             }
 
             lastCpuTime = total
-            lastAppCpuTime = idle
-
-            // GPU — estimasi berbasis CPU (alternatif asli butuh vendor API)
-            gpuValue.text = "${(usage * 0.85).toInt()}%"
+            lastIdleTime = idle
 
         } catch (e: Exception) {
             cpuValue.text = "--%"
@@ -360,12 +358,10 @@ class MainActivity : AppCompatActivity() {
     // === TEMPERATURE — BACA DARI SENSOR /sys FILES ===
     private fun updateTemperature() {
         var foundTemp = false
-        // Cek beberapa lokasi umum suhu
         val tempPaths = arrayOf(
             "/sys/devices/virtual/thermal/thermal_zone0/temp",
             "/sys/devices/virtual/thermal/thermal_zone1/temp",
-            "/sys/class/thermal/thermal_zone0/temp",
-            "/sys/devices/platform/soc/9808000.thermal/temp"
+            "/sys/class/thermal/thermal_zone0/temp"
         )
 
         for (path in tempPaths) {
@@ -450,7 +446,6 @@ class MainActivity : AppCompatActivity() {
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
-            // Full screen setiap kali fokus
             window.decorView.systemUiVisibility = (
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
