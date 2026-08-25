@@ -18,7 +18,7 @@
         android:id="@+id/tv_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/stopped"
+        android:text="⏹️ Status: STOPPED"
         android:textSize="22sp"
         android:layout_marginBottom="40dp"/>
 
@@ -26,6 +26,6 @@
         android:id="@+id/btn_toggle"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="@string/start"
+        android:text="START SERVICE"
         android:textSize="20sp"/>
 </LinearLayout>
