@@ -2,5 +2,5 @@
 <resources>
     <string name="app_name">Universal Performance</string>
     <string name="notif_channel">Universal Performance</string>
-    <string name="notif_text">Anti Lag • Anti Freeze • GPU Opt — Aktif</string>
+    <string name="notif_text">Anti Lag - Anti Freeze - GPU Opt - Aktif</string>
 </resources>
