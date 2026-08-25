@@ -32,7 +32,7 @@ public class PerformanceService extends Service {
             gpuAntiLag = i.getBooleanExtra("gpu_anti_lag", false);
             dnd = i.getBooleanExtra("dnd_mode", false);
             ramBoost = i.getBooleanExtra("ram_boost", false);
-            refreshUnlock = i.getBooleanExtra("refresh_rate_unlock", false);
+            refreshUnlock = i.getBooleanExtra("refresh_unlock", false);
         }
     };
 
@@ -53,9 +53,11 @@ public class PerformanceService extends Service {
     }
 
     private Notification buildNotif() {
+        String monitoring = currentPkg.isEmpty() ? "Waiting for game…" : GameConfig.getGameInfo(currentPkg) != null 
+            ? "🎮 " + GameConfig.getGameInfo(currentPkg).name : currentPkg;
         return new Notification.Builder(this, CHANNEL)
             .setContentTitle("Universal Performance — ACTIVE")
-            .setContentText("Monitoring: " + (currentPkg.isEmpty() ? "None" : currentPkg))
+            .setContentText(monitoring)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setOngoing(true).build();
     }
@@ -76,39 +78,46 @@ public class PerformanceService extends Service {
             currentPkg = top;
 
             if (isGame) {
-                applyAll();
+                applyAllOptimizations();
                 startService(new Intent(this, FpsOverlayService.class));
                 Log.d(TAG, "🎮 GAME DETECTED: " + top);
             } else if (wasGame) {
-                resetAll();
+                resetAllOptimizations();
                 stopService(new Intent(this, FpsOverlayService.class));
-                Log.d(TAG, "🎮 GAME CLOSED");
+                Log.d(TAG, "🎮 GAME CLOSED — Reset optimizations");
             }
             ((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).notify(NOTIF_ID, buildNotif());
         }
 
-        if (ramBoost) cleanBackground();
+        if (ramBoost) cleanBackgroundApps();
         h.postDelayed(this::checkGame, 1000);
     }
 
-    private void applyAll() {
+    private void applyAllOptimizations() {
         if (antiLag) android.os.Process.setThreadPriority(android.os.Process.myPid(), -10);
         if (dnd && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-            if (nm.isNotificationPolicyAccessGranted()) nm.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
+            if (nm.isNotificationPolicyAccessGranted()) {
+                nm.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
+            }
+        }
+        if (refreshUnlock) {
+            RefreshRateHelper.setRefreshRate(this, 120);
         }
         Log.d(TAG, "✅ ALL OPTIMIZATIONS APPLIED");
     }
 
-    private void resetAll() {
+    private void resetAllOptimizations() {
         if (dnd && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-            if (nm.isNotificationPolicyAccessGranted()) nm.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL);
+            if (nm.isNotificationPolicyAccessGranted()) {
+                nm.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL);
+            }
         }
         Log.d(TAG, "🔄 ALL OPTIMIZATIONS RESET");
     }
 
-    private void cleanBackground() {
+    private void cleanBackgroundApps() {
         try {
             ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
             List<ActivityManager.RunningAppProcessInfo> ps = am.getRunningAppProcesses();
@@ -127,7 +136,7 @@ public class PerformanceService extends Service {
         h.removeCallbacksAndMessages(null);
         unregisterReceiver(recv);
         stopService(new Intent(this, FpsOverlayService.class));
-        resetAll();
+        resetAllOptimizations();
     }
     @Override public IBinder onBind(Intent i) { return null; }
 }
