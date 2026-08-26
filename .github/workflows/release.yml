@@ -8,29 +8,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Gradle 8.5
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.5'
-
-      # ✅ BIAR GRADLE SENDIRI YANG BUAT WRAPPER — TIDAK PERLU DOWNLOAD .jar!
-      - name: Generate Gradle Wrapper
+      # ✅ TAMBAH INI — OTOMATIS BUAT GRADLE WRAPPER!!!
+      - name: Setup Gradle Wrapper
         run: |
-          gradle wrapper --gradle-version 8.5
           chmod +x gradlew
+          ./gradlew wrapper --gradle-version 8.5
 
       - name: Build APK
-        run: ./gradlew assembleDebug assembleRelease
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: APK Files
-          path: app/build/outputs/apk/**/*.apk
-          
+        run: ./gradlew assembleRelease
+        
