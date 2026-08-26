@@ -3,8 +3,6 @@ name: Build & Release APK
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -22,13 +20,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Prepare Gradle
-        run: |
-          chmod +x gradlew
-          ./gradlew wrapper --gradle-version 8.5
-
+      # ✅ LANGSUNG PAKAI GRADLE RESOLVER — TANPA FILE gradlew!
       - name: Build Release APK
-        run: ./gradlew assembleRelease
+        run: |
+          gradle assembleRelease --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
