@@ -1,6 +1,6 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android' version '1.9.20' // ✅ WAJIB 1.9.20+ untuk Gradle 8.5!
+    id 'org.jetbrains.kotlin.android' version '1.9.20'  // ✅ WAJIB 1.9.20!
 }
 
 android {
@@ -18,20 +18,19 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_17  // ✅ WAJIB 17!
         targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '17'
+        jvmTarget = '17'  // ✅ WAJIB 17 — SAMA DI ATAS!
     }
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.20" // ✅ SAMA DENGAN VERSI DI ATAS!
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.20"
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
