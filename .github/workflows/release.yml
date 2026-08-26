@@ -11,7 +11,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # ✅ TAMBAH 2 BARIS INI — KUNCI UTAMA!!!
       - name: Prepare Gradle
         run: |
           chmod +x gradlew
