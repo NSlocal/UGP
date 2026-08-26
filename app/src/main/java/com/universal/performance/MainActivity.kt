@@ -34,7 +34,6 @@ class MainActivity : AppCompatActivity() {
     private val choreographer = android.view.Choreographer.getInstance()
     private var fpsCallback: android.view.Choreographer.FrameCallback? = null
 
-    // ✅ 5 FITUR
     private var speedBypassEnabled = true
     private var batterySaverEnabled = true
     private var graphicsEnabled = true
@@ -45,7 +44,6 @@ class MainActivity : AppCompatActivity() {
     private var simulatedGpu = 40.0
     private val random = java.util.Random()
 
-    // === FLOATING OVERLAY ===
     private var overlayView: View? = null
     private var overlayFps: TextView? = null
     private var overlayGpu: TextView? = null
@@ -101,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         header.addView(title)
         root.addView(header)
 
-        // ✅ FPS/GPU/CPU MONITOR — WARNA SESUAI PERMINTAAN
+        // FPS/GPU/CPU Monitor
         val monitorContainer = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
@@ -136,7 +134,7 @@ class MainActivity : AppCompatActivity() {
         fpsValue = TextView(this).apply {
             text = "--"
             textSize = 20f
-            setTextColor(Color.parseColor("#4CAF50")) // 🟢 HIJAU
+            setTextColor(Color.parseColor("#4CAF50"))
             setTypeface(null, android.graphics.Typeface.BOLD)
             setPadding(8, 0, 0, 0)
         }
@@ -157,7 +155,7 @@ class MainActivity : AppCompatActivity() {
         gpuValue = TextView(this).apply {
             text = "--%"
             textSize = 20f
-            setTextColor(Color.WHITE) // ⚪ PUTIH
+            setTextColor(Color.WHITE)
             setTypeface(null, android.graphics.Typeface.BOLD)
             setPadding(8, 0, 0, 0)
         }
@@ -177,7 +175,7 @@ class MainActivity : AppCompatActivity() {
         cpuValue = TextView(this).apply {
             text = "--%"
             textSize = 20f
-            setTextColor(Color.WHITE) // ⚪ PUTIH
+            setTextColor(Color.WHITE)
             setTypeface(null, android.graphics.Typeface.BOLD)
             setPadding(8, 0, 0, 0)
         }
@@ -187,7 +185,7 @@ class MainActivity : AppCompatActivity() {
         monitorContainer.addView(monitorBg)
         root.addView(monitorContainer)
 
-        // ✅ Info Panel — Temperature = 🔴 MERAH
+        // Info Panel
         val infoCard = CardView(this).apply {
             setCardBackgroundColor(Color.parseColor("#1E1E1E"))
             radius = 16f
@@ -199,13 +197,13 @@ class MainActivity : AppCompatActivity() {
             ).apply { setMargins(24, 8, 24, 16) }
         }
         val infoLayout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        tempValue = createInfoRow(infoLayout, "Temperature", "--°C", "#F44336") // 🔴 MERAH
+        tempValue = createInfoRow(infoLayout, "Temperature", "--°C", "#F44336")
         batteryValue = createInfoRow(infoLayout, "Battery", "--%", "#03DAC6")
         statusValue = createInfoRow(infoLayout, "Status", "0/5 Features Active", "#6200EE")
         infoCard.addView(infoLayout)
         root.addView(infoCard)
 
-        // ✅ FITUR 5: Show Status Active + Overlay
+        // Fitur 5: Show Status Active
         val feature5Card = CardView(this).apply {
             setCardBackgroundColor(Color.parseColor("#1E1E1E"))
             radius = 20f
@@ -245,7 +243,7 @@ class MainActivity : AppCompatActivity() {
                 if (isChecked) checkOverlayPermission() else hideFloatingOverlay()
                 updateStatus()
                 Toast.makeText(this@MainActivity,
-                    if (isChecked) "Overlay AKTIF! Bisa digeser! ✅" else "Overlay disembunyikan ⚠️",
+                    if (isChecked) "Overlay AKTIF! ✅" else "Overlay disembunyikan ⚠️",
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -255,7 +253,7 @@ class MainActivity : AppCompatActivity() {
         feature5Card.addView(feature5Content)
         root.addView(feature5Card)
 
-        // ✅ Fitur 1-4
+        // Fitur 1-4
         val scroll = ScrollView(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -303,15 +301,10 @@ class MainActivity : AppCompatActivity() {
         updateStatus()
         startRealTimeMonitoring()
         applyPerformanceFixes()
-
-        // ✅ Minta Notification Permission
         requestNotificationPermission()
-
-        // ✅ Auto start overlay
         if (showStatusOverlay) checkOverlayPermission()
     }
 
-    // ✅ Notification Permission
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -325,7 +318,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ UPDATE STATUS — 5/5!
     private fun updateStatus() {
         val activeCount = listOf(
             speedBypassEnabled, batterySaverEnabled, graphicsEnabled, noGmsEnabled, showStatusOverlay
@@ -333,7 +325,6 @@ class MainActivity : AppCompatActivity() {
         statusValue.text = "$activeCount/5 Features Active ✅"
     }
 
-    // ✅ FPS/GPU/CPU/TEMP REAL-TIME — UPDATE KE OVERLAY JUGA!
     private fun startRealTimeMonitoring() {
         frameCount = 0
         lastFpsTime = System.nanoTime()
@@ -407,7 +398,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ PERMISSION OVERLAY
     private fun checkOverlayPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !android.provider.Settings.canDrawOverlays(this)) {
             val intent = Intent(
@@ -415,13 +405,11 @@ class MainActivity : AppCompatActivity() {
                 android.net.Uri.parse("package:$packageName")
             )
             startActivityForResult(intent, REQUEST_OVERLAY_PERMISSION)
-            Toast.makeText(this, "⚠️ Izinkan 'Tampil di atas aplikasi lain' → lalu kembali ke UGP!", Toast.LENGTH_LONG).show()
         } else {
             showFloatingOverlay()
         }
     }
 
-    // ✅ OVERLAY + BISA DIGESER! setOnTouchListener + Drag Logic!
     private fun showFloatingOverlay() {
         if (overlayView != null) return
 
@@ -432,54 +420,36 @@ class MainActivity : AppCompatActivity() {
             background = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
                 cornerRadius = 999f
-                setColor(Color.parseColor("#CC000000")) // Transparan
+                setColor(Color.parseColor("#CC000000"))
             }
 
-            // 🖐️ BISA DIGESER — DRAG LOGIC LENGKAP!
-            setOnTouchListener(object : View.OnTouchListener {
-                private var initialX = 0f
-                private var initialY = 0f
-                private var initialTouchX = 0f
-                private var initialTouchY = 0f
-                private var isDragging = false
-                private val CLICK_THRESHOLD = 10f
+            var initialX = 0f
+            var initialY = 0f
+            var initialTouchX = 0f
+            var initialTouchY = 0f
 
-                override fun onTouch(v: View?, event: MotionEvent): Boolean {
-                    val params = v?.layoutParams as WindowManager.LayoutParams
-                    when (event.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            initialX = params.x.toFloat()
-                            initialY = params.y.toFloat()
-                            initialTouchX = event.rawX
-                            initialTouchY = event.rawY
-                            isDragging = false
-                            return true
-                        }
-                        MotionEvent.ACTION_MOVE -> {
-                            val dx = Math.abs(event.rawX - initialTouchX)
-                            val dy = Math.abs(event.rawY - initialTouchY)
-                            if (dx > CLICK_THRESHOLD || dy > CLICK_THRESHOLD) {
-                                isDragging = true
-                                params.x = (initialX + (event.rawX - initialTouchX)).toInt()
-                                params.y = (initialY + (event.rawY - initialTouchY)).toInt()
-                                windowManager.updateViewLayout(v, params)
-                            }
-                            return true
-                        }
-                        MotionEvent.ACTION_UP -> {
-                            if (!isDragging) {
-                                // Klik biasa — bisa tambah aksi nanti
-                                return false
-                            }
-                            return true
-                        }
+            setOnTouchListener { v, event ->
+                val params = v?.layoutParams as WindowManager.LayoutParams
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        initialX = params.x.toFloat()
+                        initialY = params.y.toFloat()
+                        initialTouchX = event.rawX
+                        initialTouchY = event.rawY
+                        true
                     }
-                    return false
+                    MotionEvent.ACTION_MOVE -> {
+                        params.x = (initialX + (event.rawX - initialTouchX)).toInt()
+                        params.y = (initialY + (event.rawY - initialTouchY)).toInt()
+                        windowManager.updateViewLayout(v, params)
+                        true
+                    }
+                    else -> false
                 }
-            })
+            }
         }
 
-        // FPS — 🟢 HIJAU
+        // FPS — Hijau
         layout.addView(TextView(this).apply {
             text = "FPS"
             textSize = 13f
@@ -489,13 +459,13 @@ class MainActivity : AppCompatActivity() {
         overlayFps = TextView(this).apply {
             text = "60"
             textSize = 13f
-            setTextColor(Color.parseColor("#4CAF50")) // 🟢 HIJAU
+            setTextColor(Color.parseColor("#4CAF50"))
             setTypeface(null, android.graphics.Typeface.BOLD)
             setPadding(0, 0, 12, 0)
         }
         layout.addView(overlayFps!!)
 
-        // GPU — ⚪ PUTIH
+        // GPU — Putih
         layout.addView(TextView(this).apply {
             text = "GPU"
             textSize = 13f
@@ -505,13 +475,13 @@ class MainActivity : AppCompatActivity() {
         overlayGpu = TextView(this).apply {
             text = "40%"
             textSize = 13f
-            setTextColor(Color.WHITE) // ⚪ PUTIH
+            setTextColor(Color.WHITE)
             setTypeface(null, android.graphics.Typeface.BOLD)
             setPadding(0, 0, 12, 0)
         }
         layout.addView(overlayGpu!!)
 
-        // CPU — ⚪ PUTIH
+        // CPU — Putih
         layout.addView(TextView(this).apply {
             text = "CPU"
             textSize = 13f
@@ -521,13 +491,13 @@ class MainActivity : AppCompatActivity() {
         overlayCpu = TextView(this).apply {
             text = "30%"
             textSize = 13f
-            setTextColor(Color.WHITE) // ⚪ PUTIH
+            setTextColor(Color.WHITE)
             setTypeface(null, android.graphics.Typeface.BOLD)
             setPadding(0, 0, 12, 0)
         }
         layout.addView(overlayCpu!!)
 
-        // TEMP — 🔴 MERAH
+        // Temp — Merah
         layout.addView(TextView(this).apply {
             text = "°C"
             textSize = 13f
@@ -537,7 +507,7 @@ class MainActivity : AppCompatActivity() {
         overlayTemp = TextView(this).apply {
             text = "45"
             textSize = 13f
-            setTextColor(Color.parseColor("#F44336")) // 🔴 MERAH
+            setTextColor(Color.parseColor("#F44336"))
             setTypeface(null, android.graphics.Typeface.BOLD)
         }
         layout.addView(overlayTemp!!)
@@ -558,7 +528,6 @@ class MainActivity : AppCompatActivity() {
 
         overlayView = layout
         windowManager.addView(layout, params)
-        Toast.makeText(this, "✅ OVERLAY MUNCUL! Tahan & geser untuk pindah posisi! 🎮", Toast.LENGTH_LONG).show()
     }
 
     private fun hideFloatingOverlay() {
@@ -570,7 +539,6 @@ class MainActivity : AppCompatActivity() {
         overlayTemp = null
     }
 
-    // === UTILITY ===
     private fun createInfoRow(parent: LinearLayout, label: String, value: String, color: String): TextView {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -669,10 +637,8 @@ class MainActivity : AppCompatActivity() {
             if (android.provider.Settings.canDrawOverlays(this)) {
                 showFloatingOverlay()
                 overlayToggle.isChecked = true
-                Toast.makeText(this, "✅ Izin Diterima! Overlay muncul! Tahan & geser untuk pindah posisi! 🎮", Toast.LENGTH_LONG).show()
             } else {
                 overlayToggle.isChecked = false
-                Toast.makeText(this, "❌ Izin ditolak — overlay tidak bisa muncul", Toast.LENGTH_SHORT).show()
             }
         }
     }
