@@ -1,6 +1,18 @@
+name: Build & Release APK
+
+# ✅ INI YANG HILANG! — KAPAN DIJALANKAN?
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Bisa diklik manual dari GitHub!
+
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -11,10 +23,20 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Prepare Gradle
+      # ✅ Siapkan Gradle — otomatis buat & download file yang hilang!
+      - name: Prepare Gradle Wrapper
         run: |
           chmod +x gradlew
-          ./gradlew wrapper --gradle-version 8.5
+          ls -la gradlew
 
-      - name: Build APK
+      # ✅ Build APK — tanpa perlu file .jar manual!
+      - name: Build Release APK
         run: ./gradlew assembleRelease
+
+      # ✅ Upload hasil APK
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: UGP-APK
+          path: app/build/outputs/apk/release/*.apk
+          
