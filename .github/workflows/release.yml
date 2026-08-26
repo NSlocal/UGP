@@ -23,7 +23,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # ✅ Siapkan Gradle — otomatis buat & download file yang hilang!
+      # Siapkan Gradle — otomatis buat & download file yang hilang!
       - name: Prepare Gradle Wrapper
         run: |
          chmod +x gradlew
