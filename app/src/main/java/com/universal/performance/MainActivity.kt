@@ -24,7 +24,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var gpuValue: TextView
     private lateinit var cpuValue: TextView
     private lateinit var tempValue: TextView
-    private lateinit var batteryValue: TextView
     private lateinit var statusValue: TextView
     private lateinit var overlayToggle: Switch
 
@@ -185,7 +184,7 @@ class MainActivity : AppCompatActivity() {
         monitorContainer.addView(monitorBg)
         root.addView(monitorContainer)
 
-        // Info Panel
+        // Info Panel — Temperature = Merah
         val infoCard = CardView(this).apply {
             setCardBackgroundColor(Color.parseColor("#1E1E1E"))
             radius = 16f
@@ -198,7 +197,6 @@ class MainActivity : AppCompatActivity() {
         }
         val infoLayout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         tempValue = createInfoRow(infoLayout, "Temperature", "--°C", "#F44336")
-        batteryValue = createInfoRow(infoLayout, "Battery", "--%", "#03DAC6")
         statusValue = createInfoRow(infoLayout, "Status", "0/5 Features Active", "#6200EE")
         infoCard.addView(infoLayout)
         root.addView(infoCard)
@@ -242,10 +240,6 @@ class MainActivity : AppCompatActivity() {
                 showStatusOverlay = isChecked
                 if (isChecked) checkOverlayPermission() else hideFloatingOverlay()
                 updateStatus()
-                Toast.makeText(this@MainActivity,
-                    if (isChecked) "Overlay AKTIF! ✅" else "Overlay disembunyikan ⚠️",
-                    Toast.LENGTH_SHORT
-                ).show()
             }
         }
         feature5Content.addView(feature5Text)
@@ -300,7 +294,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(root)
         updateStatus()
         startRealTimeMonitoring()
-        applyPerformanceFixes()
         requestNotificationPermission()
         if (showStatusOverlay) checkOverlayPermission()
     }
@@ -351,7 +344,6 @@ class MainActivity : AppCompatActivity() {
             override fun run() {
                 updateCpuGpu()
                 updateTemperature()
-                updateBattery()
                 handler.postDelayed(this, 500)
             }
         })
@@ -387,15 +379,6 @@ class MainActivity : AppCompatActivity() {
             } catch (_: Exception) {}
         }
         tempValue.text = "N/A"
-    }
-
-    private fun updateBattery() {
-        val intent = registerReceiver(null, android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED))
-        if (intent != null) {
-            val lvl = intent.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1)
-            val scale = intent.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1)
-            batteryValue.text = if (lvl != -1 && scale != -1) "${(lvl * 100 / scale.toFloat()).roundToInt()}%" else "--%"
-        }
     }
 
     private fun checkOverlayPermission() {
@@ -605,25 +588,12 @@ class MainActivity : AppCompatActivity() {
             isChecked = initialState
             setOnCheckedChangeListener { _, isChecked ->
                 onToggle(isChecked)
-                Toast.makeText(this@MainActivity,
-                    if (isChecked) "$title → Enabled ✅" else "$title → Disabled ⚠️", Toast.LENGTH_SHORT).show()
             }
         }
         content.addView(textLayout)
         content.addView(switch)
         card.addView(content)
         return card
-    }
-
-    private fun applyPerformanceFixes() {
-        try {
-            if (noGmsEnabled) {
-                packageManager.setComponentEnabledSetting(
-                    android.content.ComponentName("com.google.android.gms", "com.google.android.gms.StandaloneReferrerReceiver"),
-                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP
-                )
-            }
-        } catch (_: Exception) {}
     }
 
     private fun getStatusBarHeight(): Int {
@@ -649,7 +619,6 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_NOTIFICATION_PERMISSION) {
             val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
-            Toast.makeText(this, if (granted) "Notifikasi Diizinkan ✅" else "Notifikasi Ditolak ⚠️", Toast.LENGTH_SHORT).show()
         }
     }
 
