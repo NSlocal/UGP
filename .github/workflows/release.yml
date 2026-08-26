@@ -1,9 +1,3 @@
-name: Build & Release APK
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,12 +11,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # ✅ TAMBAH INI — OTOMATIS BUAT GRADLE WRAPPER!!!
-      - name: Setup Gradle Wrapper
+      # ✅ TAMBAH 2 BARIS INI — KUNCI UTAMA!!!
+      - name: Prepare Gradle
         run: |
           chmod +x gradlew
           ./gradlew wrapper --gradle-version 8.5
 
       - name: Build APK
         run: ./gradlew assembleRelease
-        
